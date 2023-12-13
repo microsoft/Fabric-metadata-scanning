@@ -1,0 +1,40 @@
+{
+  "shared": {
+    "threadsCount": 16, // Up to 16 simultaneous requests
+    "defaultRetryAfter": 500
+  },
+  "auth": {
+    "clientId": "<your client id>",
+    "tenantId": "<your tenant id>"
+  },
+  "modified": {
+    "outputFolder": "outputs\\ModifiedWorkspaces",
+    "modifiedSince": "2023-12-02T20:10:49.8382543Z", // iso8601 format
+    "alwaysFullScan": false,
+    "excludeInActiveWorkspaces": false,
+    "excludePersonalWorkspaces": false,
+    "requestsLimit": 30, // Maximum requests per hour
+    "limitDurationInMinutes": 60
+  },
+  "getInfo": {
+    "chunkMaxSize": 100,
+    "datasetExpressions": true,
+    "datasetSchema": true,
+    "datasourceDetails": true,
+    "getArtifactUsers": true,
+    "lineage": true,
+    "getTridentArtifacts": true,
+    "requestsLimit": 500, // Maximum requests per hour
+    "limitDurationInMinutes": 60
+  },
+  "scanStatus": {
+    "requestsLimit": 10000, // Maximum requests per hour
+    "limitDurationInMinutes": 60
+  },
+  "scanResult": {
+    "resultsStatusFolder": "outputs\\Results",
+    "baseOutputFolder": "outputs\\Workspaces",
+    "requestsLimit": 500, // Maximum requests per hour
+    "limitDurationInMinutes": 60
+  }
+}

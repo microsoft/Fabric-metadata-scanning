@@ -1,0 +1,49 @@
+{
+  "status": "Succeeded",
+  "Artifacts amounts": {
+    "workspaces": 2291,
+    "reports": 58,
+    "dashboards": 29,
+    "datasets": 329,
+    "dataflows": 7,
+    "datamarts": 4
+  },
+  "datasourceInstances": [
+    {
+      "datasourceType": "",
+      "connectionDetails": {
+        "extensionDataSourceKind": "extensionDataSourceKind",
+        "extensionDataSourcePath": "extensionDataSourcePath"
+      },
+      "datasourceId": "datasourceId",
+      "gatewayId": "gatewayId"
+    },
+    {
+      "datasourceType": "Sql",
+      "connectionDetails": {
+        "server": "server",
+        "database": "database"
+      },
+      "datasourceId": "datasourceId",
+      "gatewayId": "gatewayId"
+    },
+    {
+      "datasourceType": "Web",
+      "connectionDetails": {
+        "url": "url"
+      },
+      "datasourceId": "datasourceId",
+      "gatewayId": "gatewayId"
+    }
+  ],
+  "misconfiguredDatasourceInstances": [
+    {
+      "datasourceType": "datasourceType",
+      "connectionDetails": {
+        "path": "path",
+        "kind": "kind"
+      },
+      "datasourceId": "datasourceId"
+    }
+  ]
+}
