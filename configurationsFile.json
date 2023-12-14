@@ -4,8 +4,8 @@
     "defaultRetryAfter": 500
   },
   "auth": {
-    "clientId": "849efc11-1579-4345-88e1-baa6ea935748",
-    "tenantId": "82e09e3a-99a6-4ec0-a928-e8a90bcd1515"
+    "clientId": "<your client id>",
+    "tenantId": "<your tenant id>"
   },
   "modified": {
     "outputFolder": "outputs\\ModifiedWorkspaces",

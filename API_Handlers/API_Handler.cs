@@ -70,8 +70,8 @@ namespace Fabric_Metadata_Scanning
 
                     if (retryAfter > 0)
                     {
-                        Console.WriteLine($"To many requests for {apiName} API. Retring in {retryAfter / 1000} seconds");
-                        Thread.Sleep(retryAfter);
+                        Console.WriteLine($"To many requests for {apiName} API. Retring in {retryAfter} seconds");
+                        Thread.Sleep(retryAfter*1000);
                         return false;
                     }
                     return true;

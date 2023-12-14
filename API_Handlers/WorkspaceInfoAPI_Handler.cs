@@ -61,15 +61,18 @@ namespace Fabric_Metadata_Scanning
                 HttpResponseMessage response;
                 try
                 {
-                    response = await httpClient.PostAsync(apiUriBuilder.Uri, content);
+                    do
+                    {
+                        response = await httpClient.PostAsync(apiUriBuilder.Uri, content);
+                    } while (!await verifySuccess(response));
+
                 }
                 catch (Exception ex)
                 {
                     throw new ScanningException(apiName, "Can't send request");
                     
                 }
-                await verifySuccess(response);
-
+                
                 if (response.Content != null)
                 {
                     var scanDetailsString = await response.Content.ReadAsStringAsync();
