@@ -6,14 +6,24 @@ namespace Fabric_Metadata_Scanning
     class Auth_Handler
     {
         private static Auth_Handler instance = null;
+        private static object lockObject = new object();
+
         public static Auth_Handler Instance
         {
             get
             {
+
                 if (instance == null)
                 {
-                    instance = new Auth_Handler();
+                    lock (lockObject)
+                    {
+                        if (instance == null)
+                        {
+                            instance = new Auth_Handler();
+                        }
+                    }
                 }
+                
                 return instance;
             }
         }

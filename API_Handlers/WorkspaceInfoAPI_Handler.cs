@@ -56,12 +56,8 @@ namespace Fabric_Metadata_Scanning
                 string requestJsonString = JsonConvert.SerializeObject(requestBody);
                 HttpContent content = new StringContent(requestJsonString, Encoding.UTF8, "application/json");
 
-                string accessToken = Auth_Handler.Instance.accessToken;
-                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-
-                // Detect usage - DO NOT MODIFY
-                //httpClient.DefaultRequestHeaders.Add("X-POWERBI-ADMIN-CLIENT-NAME", "FabricScanningClient");
-
+                setHeaders(httpClient);
+                
                 HttpResponseMessage response;
                 try
                 {
@@ -72,7 +68,7 @@ namespace Fabric_Metadata_Scanning
                     throw new ScanningException(apiName, "Can't send request");
                     
                 }
-                verifySuccess(response);
+                await verifySuccess(response);
 
                 if (response.Content != null)
                 {

@@ -23,25 +23,16 @@ namespace Fabric_Metadata_Scanning
         {
             using (HttpClient httpClient = new HttpClient())
             {
-                // Set the authorization header with the token
-                string accessToken = Auth_Handler.Instance.accessToken;
-                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-
-                // Detect usage - DO NOT MODIFY
-                httpClient.DefaultRequestHeaders.Add("X-POWERBI-ADMIN-CLIENT-NAME", "FabricScanningClient");
-                
-                // Send the GET request
-                HttpResponseMessage response = await httpClient.GetAsync(apiUriBuilder.Uri + $"/{scanId}");
-
-                int retryAfter = await verifySuccess(response);
-
-                if (retryAfter > 0)
+                HttpResponseMessage response;
+                setHeaders(httpClient);
+                do
                 {
-                    Console.WriteLine($"To many requests for {apiName} API. Retring in {retryAfter / 1000} seconds");
-                    Thread.Sleep(retryAfter);
-                    return await sendGetRequest(scanId);
-                }
+                    
+                    response = await httpClient.GetAsync(apiUriBuilder.Uri + $"/{scanId}");
+
+                } while (!await verifySuccess(response));
                 
+
                 return response;
             }
         }
@@ -58,24 +49,34 @@ namespace Fabric_Metadata_Scanning
             apiUriBuilder.Query = parametersString.ToString();
         }
 
-        public async Task<int> verifySuccess(HttpResponseMessage response)
+        public async Task<bool> verifySuccess(HttpResponseMessage response)
         {
 
             if (!response.IsSuccessStatusCode)
             {
                 if((int)response.StatusCode == 429)
                 {
+                    int retryAfter;
                     RetryConditionHeaderValue retryAfterObject = response.Headers.RetryAfter;
+
                     if (Equals(retryAfterObject, null))
                     {
-                        return (int)Configuration_Handler.Instance.getConfig("shared", "defaultRetryAfter");
+                        retryAfter = (int)Configuration_Handler.Instance.getConfig("shared", "defaultRetryAfter");
                     }
                     else
-                    {
-                        int.TryParse(retryAfterObject.ToString(), out int retryAfter);
-                        return retryAfter;
+                    {                  
+                        int.TryParse(retryAfterObject.ToString(), out retryAfter );
                     }
+
+                    if (retryAfter > 0)
+                    {
+                        Console.WriteLine($"To many requests for {apiName} API. Retring in {retryAfter / 1000} seconds");
+                        Thread.Sleep(retryAfter);
+                        return false;
+                    }
+                    return true;
                 }
+
                 var jsonString = await response.Content.ReadAsStringAsync();
                 dynamic errorObject = JObject.Parse(jsonString);
                 if (errorObject?.error.details != null)
@@ -87,7 +88,17 @@ namespace Fabric_Metadata_Scanning
                     throw new ScanningException(apiName, errorObject?.error.message);
                 }
             }
-            return 0;
+            return false;
+        }
+
+        public void setHeaders(HttpClient httpClient)
+        {
+            // Set the authorization header with the access token, to identify the specific client 
+            string accessToken = Auth_Handler.Instance.accessToken;
+            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+            // Used for telemetry purposes, DO NOT MODIFY.
+            httpClient.DefaultRequestHeaders.Add("X-POWERBI-ADMIN-CLIENT-NAME", "FabricScanningClient");
         }
     }
 }

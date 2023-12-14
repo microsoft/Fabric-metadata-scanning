@@ -7,6 +7,7 @@ namespace Fabric_Metadata_Scanning
     public sealed class Configuration_Handler
     {
         private static Configuration_Handler instance = null;
+        private static object lockObject = new object();
 
         public string _configurationFilePath { get; set; }
         public JObject _configurationSettings { get; set; }
@@ -22,8 +23,15 @@ namespace Fabric_Metadata_Scanning
             {
                 if (instance == null)
                 {
-                    instance = new Configuration_Handler();
+                    lock (lockObject)
+                    {
+                        if (instance == null)
+                        {
+                            instance = new Configuration_Handler();
+                        }
+                    }
                 }
+                
                 return instance;
             }
         }

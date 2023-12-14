@@ -9,10 +9,10 @@ namespace Fabric_Metadata_Scanning
 
         public ModifiedAPI_Handler() : base("modified")
         {
-            bool excludeInActiveWorkspaces = Configuration_Handler.Instance.getConfig(apiName, "excludeInActiveWorkspaces").Value<bool>();
+            bool excludeInactiveWorkspaces = Configuration_Handler.Instance.getConfig(apiName, "excludeInactiveWorkspaces").Value<bool>();
             bool excludePersonalWorkspaces = Configuration_Handler.Instance.getConfig(apiName, "excludePersonalWorkspaces").Value<bool>();
 
-            parameters.Add("excludeInActiveWorkspaces", excludeInActiveWorkspaces);
+            parameters.Add("excludeInactiveWorkspaces", excludeInactiveWorkspaces);
             parameters.Add("excludePersonalWorkspaces", excludePersonalWorkspaces);
 
             string modifiedSince = Configuration_Handler.Instance.getConfig(apiName, "modifiedSince").Value<string>();
