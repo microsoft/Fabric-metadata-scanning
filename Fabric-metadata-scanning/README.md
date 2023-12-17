@@ -12,7 +12,7 @@ This is a template. Feel free to adjust and modify it for your needs.
 	1. Go to Azure Portal.
 	2. Create an AAD app (Entra Id).
 	3. Click on Add -> Add Registration
-	   ![img](https://github.com/Microsoft/Fabric-Metadata-Scanning/blob/master/images/add_registretion.png)
+	   ![img](https://github.com/Microsoft/Fabric-Metadata-Scanning/blob/master/images/add_registration.png)
 	4. Set the name and supported account types and click Register.
 	5. On the left bar click on API permissions.
 	6. Add Permission -> Power BI Service
