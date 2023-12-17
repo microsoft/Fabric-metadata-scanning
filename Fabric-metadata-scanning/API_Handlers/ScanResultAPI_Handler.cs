@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Text.Json.Nodes;
 
 namespace Fabric_Metadata_Scanning
 {
@@ -32,12 +33,7 @@ namespace Fabric_Metadata_Scanning
 
             artifactsCounters = new Dictionary<string, int>()
             {
-                {"workspaces",0 },
-                {"reports",0 },
-                {"dashboards",0 },
-                {"datasets",0 },
-                {"dataflows",0 },
-                {"datamarts",0 }
+                { "workspaces" , 0 }
             };
         }
 
@@ -97,13 +93,27 @@ namespace Fabric_Metadata_Scanning
                 
                 lock(lockObject)
                 {
+
+                    foreach (var property in ((JObject)workspace).Properties())
+                    {
+                        string propertyName = property.Name;
+                        var propertyValue = property.Value;
+
+                        if (propertyValue is JArray artifactsArray && artifactsArray.Count > 0)
+                        {
+
+                            if (artifactsCounters.ContainsKey(propertyName))
+                            {
+                                artifactsCounters[propertyName] += artifactsArray.Count;
+                            }
+                            else
+                            {
+                                artifactsCounters[propertyName] = artifactsArray.Count;
+                            }
+                        }
+                    }
+
                     artifactsCounters["workspaces"] += 1;
-                    artifactsCounters["reports"] += ((JArray)workspace["reports"]).Count;
-                    artifactsCounters["dashboards"] += ((JArray)workspace["dashboards"]).Count;
-                    artifactsCounters["datasets"] += ((JArray)workspace["datasets"]).Count;
-                    artifactsCounters["dataflows"] += ((JArray)workspace["dataflows"]).Count;
-                    artifactsCounters["datamarts"] += ((JArray)workspace["datamarts"]).Count;
-                   
                 }
             }
 

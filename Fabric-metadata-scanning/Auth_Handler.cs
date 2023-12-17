@@ -56,7 +56,7 @@ namespace Fabric_Metadata_Scanning
                                     .ExecuteAsync();
 
                 Instance.accessToken = result.AccessToken;
-                return accessToken;
+                return result.AccessToken;
             }
 
             catch (Exception ex)

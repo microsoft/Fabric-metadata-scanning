@@ -70,7 +70,7 @@ namespace Fabric_Metadata_Scanning
 
                     if (retryAfter > 0)
                     {
-                        Console.WriteLine($"To many requests for {apiName} API. Retring in {retryAfter} seconds");
+                        Console.WriteLine($"Too many requests for {apiName} API. Retrying in {retryAfter} seconds");
                         Thread.Sleep(retryAfter*1000);
                         return false;
                     }
@@ -88,7 +88,7 @@ namespace Fabric_Metadata_Scanning
                     throw new ScanningException(apiName, errorObject?.error.message);
                 }
             }
-            return false;
+            return true;
         }
 
         public void setHeaders(HttpClient httpClient)
