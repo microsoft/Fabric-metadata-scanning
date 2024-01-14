@@ -12,16 +12,16 @@ This is a template. Feel free to adjust and modify it for your needs.
 	1. Go to Azure Portal.
 	2. Create an AAD app (Entra Id).
 	3. Click on Add -> Add Registration
-	   ![img](https://github.com/microsoft/Fabric-metadata-scanning/blob/main/Fabric-metadata-scanning/images/add_registration.png)
+	   ![registration image](https://github.com/microsoft/Fabric-metadata-scanning/blob/main/Fabric-metadata-scanning/images/add_registration.png)
 	4. Set the name and supported account types and click Register.
 	5. On the left bar click on API permissions.
 	6. Add Permission -> Power BI Service
 	7. This system manged only Delegated Permission currently, so click on that.
 	8. Search for "Tenant" and check both Tenant.Read.All and Tenant.ReadWrite.All permissions.
-	   ![img](https://github.com/microsoft/Fabric-metadata-scanning/blob/main/Fabric-metadata-scanning/images//add_permission.png)
+	   ![img](https://github.com/microsoft/Fabric-metadata-scanning/blob/main/Fabric-metadata-scanning/images/add_permission.png)
 	9. On the left bar, go to Authentication.Click on Add platform -> "Mobile and desktop applications Quickstart Docs Redirect URIs" and set http://localhost as Custom redirect URIs.
 	10. On the left bar, go to Overview, and copy the Application (client) ID and Directory (tenant) ID to the configuration file (under "auth").
-			   ![img](https://github.com/microsoft/Fabric-metadata-scanning/blob/main/Fabric-metadata-scanning/images//clientId.png)
+			   ![img](https://github.com/microsoft/Fabric-metadata-scanning/blob/main/Fabric-metadata-scanning/images/clientId.png)
 
 ### Pre-requirement:
 
