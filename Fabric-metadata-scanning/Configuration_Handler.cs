@@ -42,7 +42,7 @@ namespace Fabric_Metadata_Scanning
             if(args.Length == 0)
             {
                 // Use default configuration file.
-                _configurationFilePath = $"configurationsFile.json";
+                _configurationFilePath = "configurationsFile.json";
             }
             else
             {
