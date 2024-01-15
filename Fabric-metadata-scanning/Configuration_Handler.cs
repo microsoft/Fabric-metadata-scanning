@@ -36,11 +36,27 @@ namespace Fabric_Metadata_Scanning
             }
         }
 
-        public void setConfigurationsFile(string configurationFilePath)
+        public void setConfigurationsFile(string[] args)
         {
-            _configurationFilePath = configurationFilePath;
-            string jsonString = File.ReadAllText(_configurationFilePath);
-            _configurationSettings = JObject.Parse(jsonString);
+            
+            if(args.Length == 0)
+            {
+                // Use default configuration file.
+                _configurationFilePath = $"configurationsFile.json";
+            }
+            else
+            {
+                _configurationFilePath = args[0];
+            }
+            try
+            {
+                string jsonString = File.ReadAllText(_configurationFilePath);
+                _configurationSettings = JObject.Parse(jsonString);
+            }
+            catch
+            {
+                throw new ScanningException("Configurations",$"Expected a json configuration file in {_configurationFilePath}");
+            }
             validateConfigs();
         }
 
