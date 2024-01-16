@@ -8,9 +8,6 @@ class Program
 
     static async Task Main(string[] args)
     {
-        string currentDirectory = AppDomain.CurrentDomain.BaseDirectory;
-        string[] files = Directory.GetFiles(currentDirectory);
-
         try
         {
             Configuration_Handler configuration_handler = Configuration_Handler.Instance;
