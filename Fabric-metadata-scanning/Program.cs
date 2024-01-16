@@ -11,7 +11,7 @@ class Program
         try
         {
             Configuration_Handler configuration_handler = Configuration_Handler.Instance;
-            configuration_handler.setConfigurationsFile(args[0]);
+            configuration_handler.setConfigurationsFile(args);
 
             Auth_Handler authHandler = new Auth_Handler();
             ModifiedAPI_Handler modifiedAPI = new ModifiedAPI_Handler();
@@ -59,16 +59,16 @@ class Program
                 while (scanId == null)
                 {
                     // Waiting for response
-                    Console.WriteLine($"Thread number {num} is going to sleep .....");
+                    //Console.WriteLine($"Thread number {num} is going to sleep .....");
                     Thread.Sleep(500);
-                    Console.WriteLine($"Thread number {num} awake .....");
+                    //Console.WriteLine($"Thread number {num} awake .....");
                 }
 
                 while (!Equals(await ScanStatusAPI_Handler.Instance.run(scanId), "Succeeded"))
                 {
-                    Console.WriteLine($"Thread number {num} is going to sleep (waiting for status) ...");
-                    await Task.Delay(2500); // change waiting increasly
-                    Console.WriteLine($"Thread number {num} is awake from waiting for status ...");
+                    //Console.WriteLine($"Thread number {num} is going to sleep (waiting for status) ...");
+                    await Task.Delay(2500);
+                    //Console.WriteLine($"Thread number {num} is awake from waiting for status ...");
                 }
 
                 ScanResultAPI_Handler.Instance.run(scanId).Wait();

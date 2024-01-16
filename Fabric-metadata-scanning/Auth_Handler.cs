@@ -61,8 +61,7 @@ namespace Fabric_Metadata_Scanning
 
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
-                return null;
+                throw new ScanningException(apiName, ex.Message);
             }
         }
     }

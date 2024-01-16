@@ -123,31 +123,51 @@ namespace Fabric_Metadata_Scanning
 
                 lock (lockObject)
                 {
-                    JObject results = new JObject
+                    JObject artifacts = new JObject
                     {
                         {"status", "Succeeded"},
                         {"Artifacts amounts",JObject.FromObject(this.artifactsCounters) }
                     };
 
-                    if (sharedResult["datasourceInstances"] != null)
+                    JObject datasources = new JObject
                     {
-                        results["datasourceInstances"] = sharedResult["datasourceInstances"];
-                    }
+                        { "datasourceInstances", null },
+                        { "misconfiguredDatasourceInstances", null }
+                    };
 
-                    if (sharedResult["misconfiguredDatasourceInstances"] != null)
-                    {
-                        results["misconfiguredDatasourceInstances"] = sharedResult["misconfiguredDatasourceInstances"];
-                    }
+                    string finalResultsDileDirPath = $"{resultStatusPath}\\{resultTime}";
+                    Directory.CreateDirectory(finalResultsDileDirPath);
 
-                    using (StreamWriter file = File.CreateText($"{resultStatusPath}\\{resultTime}.json"))
+                    using (StreamWriter file = File.CreateText($"{finalResultsDileDirPath}\\artifacts.json"))
                     {
                         JsonSerializer serializer = new JsonSerializer
                         {
                             Formatting = Formatting.Indented
                         };
 
-                        serializer.Serialize(file, results);
+                        serializer.Serialize(file, artifacts);
                     }
+
+                    if (sharedResult["datasourceInstances"] != null)
+                    {
+                        datasources["datasourceInstances"] = sharedResult["datasourceInstances"];
+                    }
+
+                    if (sharedResult["misconfiguredDatasourceInstances"] != null)
+                    {
+                        datasources["misconfiguredDatasourceInstances"] = sharedResult["misconfiguredDatasourceInstances"];
+                    }
+                    using (StreamWriter file = File.CreateText($"{finalResultsDileDirPath}\\datasources.json"))
+                    {
+                        JsonSerializer serializer = new JsonSerializer
+                        {
+                            Formatting = Formatting.Indented
+                        };
+
+                        serializer.Serialize(file, datasources);
+                    }
+
+                    Console.WriteLine($"Scanning finished, The output is displayed in {Environment.CurrentDirectory + "\\" + finalResultsDileDirPath}");
                 }
             }
             return true;
