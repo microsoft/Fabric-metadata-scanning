@@ -22,7 +22,10 @@ class Program
             string accessToken = await authHandler.authenticate();
 
             string workspacesFilePath = (string)await modifiedAPI.run(null);
-
+            if (Equals(workspacesFilePath,null)) // No workspaces found.
+            {
+                return;
+            }
             workspaceInfoAPI = new WorkspaceInfoAPI_Handler(workspacesFilePath);
 
             // Start < threadsCount > tasks, each trying to acquire a permit from the semaphore and run the APIs

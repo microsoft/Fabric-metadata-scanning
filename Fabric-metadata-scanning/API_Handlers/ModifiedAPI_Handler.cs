@@ -59,7 +59,8 @@ namespace Fabric_Metadata_Scanning
 
                     if (Equals(ModifiedWorkspaces.Length, 0))
                     {
-                        throw new ScanningException(apiName, "No modified workspace since the selected date.");
+                        Console.WriteLine("No modified workspace since the selected date. Exiting...");
+                        return null;
                     }
 
                     foreach (JObject modifiedWorkspace in ModifiedWorkspaces)
