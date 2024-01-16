@@ -3,7 +3,7 @@ namespace Fabric_Metadata_Scanning
 {
     public class ScanningException : Exception
     {
-        public string ReadMeLink = "https://github.com/Microsoft/Fabric-Metadata-Scanning/blob/master/ReadMe.md";
+        public string ReadMeLink = "https://github.com/microsoft/Fabric-metadata-scanning/blob/main/README.md";
 
         public ScanningException(string apiName, string errorMessage) :
             base($"{apiName} has an error: {errorMessage}. Please check its properties.")
