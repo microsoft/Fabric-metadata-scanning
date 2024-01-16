@@ -9,7 +9,7 @@ This solution is for Microsoft Fabric metadata scanning APIs, presenting a simpl
 This is a template. Feel free to adjust and modify it for your needs.
  
 ## How To Autenticate
-	1. Go to Azure Portal. 
+	1. Go to Azure Portal.
 	2. Create an AAD app (Entra Id).
 	3. Click on Add -> Add Registration
 	   ![img](https://github.com/Microsoft/Fabric-Metadata-Scanning/blob/master/images/add_registration.png)
