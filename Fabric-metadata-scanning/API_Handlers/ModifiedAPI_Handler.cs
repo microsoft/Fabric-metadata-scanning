@@ -18,7 +18,7 @@ namespace Fabric_Metadata_Scanning
             string modifiedSince = Configuration_Handler.Instance.getConfig(apiName, "modifiedSince").Value<string>();
 
             bool alwaysFullScan = Configuration_Handler.Instance.getConfig(apiName, "alwaysFullScan").Value<bool>();
-            if (!(Equals(modifiedSince,"") || alwaysFullScan ))
+            if (!(Equals(modifiedSince,"") || alwaysFullScan )) // should use modifiedSince parameter.
             {
                 modifiedSince = DateTime.Parse(modifiedSince).ToString("O");
                 parameters.Add("modifiedSince",modifiedSince);
@@ -38,8 +38,7 @@ namespace Fabric_Metadata_Scanning
             HttpResponseMessage response = await sendGetRequest("");
 
             //The parameter modifiedSince should be in iso8601 format
-            DateTime currentTimeUtc = DateTime.UtcNow;
-            string iso8601Time = currentTimeUtc.ToString("O");
+            string iso8601Time = Configuration_Handler.Instance.scanStartTime.ToString("O");
             Configuration_Handler.Instance.setConfig(apiName, "modifiedSince", iso8601Time);
 
             return await saveOutput(response.Content);
@@ -47,9 +46,9 @@ namespace Fabric_Metadata_Scanning
 
         public async Task<string> saveOutput(HttpContent content)
         {
-            DateTime currentTime = DateTime.Now;
-            string currentTimeString = currentTime.ToString("yyyy-MM-dd-HHmmss");
-            string outputFilePath = $"{outputFolder}\\{currentTimeString}.txt";
+        
+            string scanStartTime = Configuration_Handler.Instance.scanStartTime.ToString("yyyy-MM-dd-HHmmss");
+            string outputFilePath = $"{outputFolder}\\{scanStartTime}.txt";
             using (StreamWriter outputWriter = new StreamWriter(outputFilePath))
             {
                 if (content != null)

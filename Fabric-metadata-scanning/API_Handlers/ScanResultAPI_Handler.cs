@@ -23,13 +23,13 @@ namespace Fabric_Metadata_Scanning
                 Directory.CreateDirectory(baseOutputFolder);
             }
 
-            DateTime currentTime = DateTime.Now;
-            resultTime = currentTime.ToString("yyyy-MM-dd-HHmmss");
             resultStatusPath = Configuration_Handler.Instance.getConfig("scanResult", "resultsStatusFolder").Value<string>();
             if (!Directory.Exists(resultStatusPath))
             {
                 Directory.CreateDirectory(resultStatusPath);
             }
+
+            resultTime = Configuration_Handler.Instance.scanStartTime.ToString("yyyy-MM-dd-HHmmss");
 
             artifactsCounters = new Dictionary<string, int>()
             {
@@ -134,6 +134,7 @@ namespace Fabric_Metadata_Scanning
                         { "datasourceInstances", null },
                         { "misconfiguredDatasourceInstances", null }
                     };
+
 
                     string finalResultsDileDirPath = $"{resultStatusPath}\\{resultTime}";
                     Directory.CreateDirectory(finalResultsDileDirPath);
