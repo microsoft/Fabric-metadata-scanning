@@ -11,6 +11,7 @@ namespace Fabric_Metadata_Scanning
 
         public string _configurationFilePath { get; set; }
         public JObject _configurationSettings { get; set; }
+        public DateTime scanStartTime { get; set; }
 
         private Configuration_Handler()
         {
@@ -52,6 +53,7 @@ namespace Fabric_Metadata_Scanning
             {
                 string jsonString = File.ReadAllText(_configurationFilePath);
                 _configurationSettings = JObject.Parse(jsonString);
+                scanStartTime = DateTime.Now;
             }
             catch
             {
