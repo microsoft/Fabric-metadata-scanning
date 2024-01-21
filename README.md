@@ -37,10 +37,12 @@ This is a template. Feel free to adjust and modify it for your needs.
 ## How To Run
 
 1. Clone or download the files.
-2. Set the configurations you would like to use: The system limits are written in the example configuration file. 
-3. Run "dotnet run < configuration file path >" (without the quotes). If no <configuration file path> specified, the system use the example config file location.
-4. The system will ask you to autheticate with you admin credentials.
- 5. After each run, the configuration "modifiedSince" would be set to the current time. IMPORTANT - to enable the incremental scan(set modifiedSince parameter to the last run time automatically) on debug also, set the configuration file property 'Copy to Output Directory' value  to 'Copy if newer'.
+2. Set the configurations you would like to use: The system limits are written in the example configuration file.
+3. From Fabric-metadata-scanning\Fabric-metadata-scanning folder, run "dotnet run <configuration file path>" (without the quotes). If no <configuration file path> specified, the system use the example config file location.
+For Example: cd Fabric-metadata-scanning; dotnet run
+4. The system will ask you to autheticate with your admin credentials.
+5. After each run, the configuration "modifiedSince" would be set to the current time. IMPORTANT - to enable the incremental scan(set modifiedSince parameter to the last run time automatically) on debug also, set the configuration file property 'Copy to Output Directory' value  to 'Copy if newer'.
+6. Once finished, the output file path would be printed to the console.  
 
 ## Modified Workspaces API
 
