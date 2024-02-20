@@ -27,7 +27,6 @@ namespace Fabric_Metadata_Scanning
                 setHeaders(httpClient);
                 do
                 {
-                    
                     response = await httpClient.GetAsync(apiUriBuilder.Uri + $"/{scanId}");
 
                 } while (!await verifySuccess(response));
