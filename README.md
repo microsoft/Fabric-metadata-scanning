@@ -19,7 +19,7 @@ This is a template. Feel free to adjust and modify it for your needs.
 5. On the left bar click on API permissions.
 6. Add Permission -> Power BI Service
 7. This system manged only Delegated Permission currently, so click on that.
-8. Search for "Tenant" and check both Tenant.Read.All and Tenant.ReadWrite.All permissions.
+8. Search for "Tenant" and check Tenant.Read.All permissions.
 
 ![img](https://github.com/microsoft/Fabric-metadata-scanning/blob/main/Fabric-metadata-scanning/images/add_permission.png)
 
