@@ -13,10 +13,7 @@ namespace Fabric_Metadata_Scanning
         public JObject _configurationSettings { get; set; }
         public DateTime scanStartTime { get; set; }
 
-        private Configuration_Handler()
-        {
-
-        }
+        private Configuration_Handler(){}
 
         public static Configuration_Handler Instance
         {

@@ -17,7 +17,7 @@ namespace Fabric_Metadata_Scanning
             apiUriBuilder = new UriBuilder($"https://api.powerbi.com/v1.0/myorg/admin/workspaces/{apiName}");
         }
         
-        public abstract Task<object> run(string? scanId);
+        public abstract Task<object> run(string scanId = null);
 
         public async Task<HttpResponseMessage> sendGetRequest(string? scanId)
         {
@@ -78,13 +78,15 @@ namespace Fabric_Metadata_Scanning
 
                 var jsonString = await response.Content.ReadAsStringAsync();
                 dynamic errorObject = JObject.Parse(jsonString);
-                if (errorObject?.error.details != null)
+                if (errorObject?.error.details != null && errorObject.error.details.Count > 0)
                 {
-                    throw new ScanningException(apiName, errorObject.error.details.message);
+                    string errorMessage = errorObject?.error.details[0].message;
+                    throw new ScanningException(apiName, errorMessage);
                 }
                 else
                 {
-                    throw new ScanningException(apiName, errorObject?.error.message);
+                    string errorMessage = errorObject?.error.message;
+                    throw new ScanningException(apiName, errorMessage);
                 }
             }
             return true;

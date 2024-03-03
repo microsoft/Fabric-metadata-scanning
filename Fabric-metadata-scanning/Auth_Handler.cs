@@ -18,6 +18,8 @@ using System;
 using Microsoft.Azure.KeyVault;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
+using Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos;
+using System.Text;
 
 namespace Fabric_Metadata_Scanning
 {
@@ -57,12 +59,12 @@ namespace Fabric_Metadata_Scanning
     {
         private static Auth_Handler instance = null;
         private static object lockObject = new object();
+        private Auth_Handler() {}
 
         public static Auth_Handler Instance
         {
             get
             {
-
                 if (instance == null)
                 {
                     lock (lockObject)
@@ -73,18 +75,14 @@ namespace Fabric_Metadata_Scanning
                         }
                     }
                 }
-                
                 return instance;
             }
         }
         public string apiName = "auth";
         public string accessToken { get; set; }
 
-        private static X509Certificate2 GetCertificateAsync(CertificateClient certificateClient,
-                                                        SecretClient secretClient,
-                                                        string certificateName)
+        private static X509Certificate2 GetCertificate(CertificateClient certificateClient,SecretClient secretClient,string certificateName)
         {
-
             KeyVaultCertificateWithPolicy certificate = certificateClient.GetCertificate(certificateName);
 
             // Return a certificate with only the public key if the private key is not exportable.
@@ -120,6 +118,7 @@ namespace Fabric_Metadata_Scanning
         {
             string clientId = Configuration_Handler.Instance.getConfig(apiName, "clientId").Value<string>();
             string tenantId = Configuration_Handler.Instance.getConfig(apiName, "tenantId").Value<string>();
+            //string authMethod
 
             string[] scopes = { "https://analysis.windows.net/powerbi/api/Tenant.Read.All",
                                 "https://analysis.windows.net/powerbi/api/Tenant.ReadWrite.All"
@@ -128,44 +127,27 @@ namespace Fabric_Metadata_Scanning
             string tenantAuthority = $"https://login.microsoftonline.com/{tenantId}";
 
             string redirectUri = "http://localhost";
+            //scopes = new[] { "https://analysis.windows.net/powerbi/api/.default" };
 
 
             try
             {
 
-                
-                string clientSecret = "tVD8Q~p6M61QZzZJa4Fwv5F-7f7EYa1H-QFLLc1M";
+                string keyVaultName = "fabric-md-sample-app-kv";
+                Uri keyVaultUri = new Uri($"https://{keyVaultName}.vault.azure.net");
+                var client = new SecretClient(keyVaultUri, new DefaultAzureCredential());
 
-                string certThumbprint = "BE7095C0293742F6B81DBA8AA76F4A5BA333E942";
+                var secretName = "Fabric-metadata-scanning-sample-app-kv-secret";
+                KeyVaultSecret keyVaultSecret = await client.GetSecretAsync(secretName);
 
-                string vaultUrl = "https://scanner-sample-app-kv.vault.azure.net";
-                string vaultName = "scanner-sample-app-kv";
+                var credentials = new ClientSecretCredential(tenantId: tenantId, clientId: clientId, clientSecret: keyVaultSecret.Value);
 
-                string certName = "scanner-sample-app-cert";
+                var secretClient = new SecretClient(keyVaultUri, credentials);
 
-                //var certificate = LoadCertificateFromStore(certThumbprint);
+                string certName = "Fabric-metadata-scanning-sample-app-kv-cert";
+                var certClient = new CertificateClient(keyVaultUri, credentials);
 
-                var app = ConfidentialClientApplicationBuilder.Create(clientId)
-                    .WithClientSecret(clientSecret)
-                    .WithAuthority(tenantAuthority)
-                    .Build();
-
-
-                scopes = new[] { "https://analysis.windows.net/powerbi/api/.default" };
-                var result = await app.AcquireTokenForClient(scopes)
-                    .ExecuteAsync();
-
-                Instance.accessToken = result.AccessToken;
-
-                //var options = new DefaultAzureCredentialOptions();
-                //options.SharedTokenCacheUsername = "AdminUser@pbidaily.onmicrosoft.com";
-                var creds = new DefaultAzureCredential();
-                var keyVaultUrl = new Uri(vaultUrl);
-                var credentials = new ClientSecretCredential(tenantId: tenantId, clientId: clientId, clientSecret: clientSecret);
-                var certClient = new CertificateClient(new Uri(vaultUrl), credentials);
-                var secretClient = new SecretClient(new Uri(vaultUrl), credentials);
-
-                var cert = GetCertificateAsync(certClient, secretClient, certName);
+                var cert = GetCertificate(certClient, secretClient, certName);
 
                 Console.WriteLine("Certificate loaded");
                 var app2 = ConfidentialClientApplicationBuilder.Create(clientId)
@@ -193,7 +175,7 @@ namespace Fabric_Metadata_Scanning
 
 
 
-                return result.AccessToken;
+                //return result.AccessToken;
 
 
                 ///// Service Principal with secret////

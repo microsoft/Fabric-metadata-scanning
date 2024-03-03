@@ -21,25 +21,15 @@ class Program
     {
         try
         {
-            //////////// service principal
-
-
-            ////////////
             Configuration_Handler configuration_handler = Configuration_Handler.Instance;
             configuration_handler.setConfigurationsFile(args);
-
-            //Auth_Handler authHandler = new Auth_Handler();
-            string accessToken2 = await Auth_Handler.Instance.authenticate();
-
-
+            await Auth_Handler.Instance.authenticate();
             ModifiedAPI_Handler modifiedAPI = new ModifiedAPI_Handler();
 
             int threadsCount = Configuration_Handler.Instance.getConfig("shared", "threadsCount").Value<int>();
             threadPool = new SemaphoreSlim(threadsCount, threadsCount); ;
 
-            //string accessToken = await authHandler.authenticate();
-
-            string workspacesFilePath = (string)await modifiedAPI.run(null);
+            string workspacesFilePath = (string)await modifiedAPI.run();
             if (Equals(workspacesFilePath,null)) // No workspaces found.
             {
                 return;
@@ -73,9 +63,9 @@ class Program
 
         static async Task runAPIs(object? num)
         {
-            threadPool.WaitAsync();
+            await threadPool.WaitAsync();
             string scanId;
-            while (!Equals(scanId = (string)await workspaceInfoAPI.run(null), "Done"))
+            while (!Equals(scanId = (string)await workspaceInfoAPI.run(), "Done"))
             {
                 while (scanId == null)
                 {
