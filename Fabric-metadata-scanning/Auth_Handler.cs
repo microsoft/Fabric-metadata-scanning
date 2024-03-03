@@ -93,18 +93,10 @@ namespace Fabric_Metadata_Scanning
 
             // Parse the secret ID and version to retrieve the private key.
             string[] segments = certificate.SecretId.AbsolutePath.Split('/', StringSplitOptions.RemoveEmptyEntries);
-            if (segments.Length != 3)
-            {
-                throw new InvalidOperationException($"Number of segments is incorrect: {segments.Length}, URI: {certificate.SecretId}");
-            }
-
             string secretName = segments[1];
             string secretVersion = segments[2];
-
             KeyVaultSecret secret = secretClient.GetSecret(secretName, secretVersion);
 
-            // For PEM, you'll need to extract the base64-encoded message body.
-            // .NET 5.0 preview introduces the System.Security.Cryptography.PemEncoding class to make this easier.
             if ("application/x-pkcs12".Equals(secret.Properties.ContentType, StringComparison.InvariantCultureIgnoreCase))
             {
                 byte[] pfx = Convert.FromBase64String(secret.Value);
@@ -118,96 +110,64 @@ namespace Fabric_Metadata_Scanning
         {
             string clientId = Configuration_Handler.Instance.getConfig(apiName, "clientId").Value<string>();
             string tenantId = Configuration_Handler.Instance.getConfig(apiName, "tenantId").Value<string>();
-            //string authMethod
-
-            string[] scopes = { "https://analysis.windows.net/powerbi/api/Tenant.Read.All",
-                                "https://analysis.windows.net/powerbi/api/Tenant.ReadWrite.All"
-                              }; // Use the appropriate scope for Power BI
-
+            string authMethod = Configuration_Handler.Instance.getConfig(apiName, "authMethod").Value<string>();
             string tenantAuthority = $"https://login.microsoftonline.com/{tenantId}";
-
-            string redirectUri = "http://localhost";
-            //scopes = new[] { "https://analysis.windows.net/powerbi/api/.default" };
-
+            string[] scopes;
 
             try
             {
+                if (authMethod.Equals("Service_Principal"))
+                {
+                    scopes = new [] { "https://analysis.windows.net/powerbi/api/.default" };
+                    var keyVaultName = Configuration_Handler.Instance.getConfig(apiName, "keyVaultName").Value<string>();
+                    Uri keyVaultUri = new Uri($"https://{keyVaultName}.vault.azure.net");
 
-                string keyVaultName = "fabric-md-sample-app-kv";
-                Uri keyVaultUri = new Uri($"https://{keyVaultName}.vault.azure.net");
-                var client = new SecretClient(keyVaultUri, new DefaultAzureCredential());
+                    var keyVaultSecretClient = new SecretClient(keyVaultUri, new DefaultAzureCredential());
+                    var secretName = Configuration_Handler.Instance.getConfig(apiName, "secretName").Value<string>(); ;
+                    KeyVaultSecret keyVaultSecret = await keyVaultSecretClient.GetSecretAsync(secretName);
 
-                var secretName = "Fabric-metadata-scanning-sample-app-kv-secret";
-                KeyVaultSecret keyVaultSecret = await client.GetSecretAsync(secretName);
+                    var credentials = new ClientSecretCredential(tenantId: tenantId, clientId: clientId, clientSecret: keyVaultSecret.Value);
+                    var appSecretClient = new SecretClient(keyVaultUri, credentials);
 
-                var credentials = new ClientSecretCredential(tenantId: tenantId, clientId: clientId, clientSecret: keyVaultSecret.Value);
+                    var certificateName = Configuration_Handler.Instance.getConfig(apiName, "certificateName").Value<string>(); ;
+                    var certificateClient = new CertificateClient(keyVaultUri, credentials);
+                    var certificate = GetCertificate(certificateClient, appSecretClient, certificateName);
 
-                var secretClient = new SecretClient(keyVaultUri, credentials);
+                    var appBuilder = ConfidentialClientApplicationBuilder.Create(clientId)
+                        .WithCertificate(certificate)
+                        .WithAuthority(tenantAuthority)
+                        .Build();
 
-                string certName = "Fabric-metadata-scanning-sample-app-kv-cert";
-                var certClient = new CertificateClient(keyVaultUri, credentials);
+                    var result = await appBuilder.AcquireTokenForClient(scopes)
+                        .ExecuteAsync();
+                    Instance.accessToken = result.AccessToken;
 
-                var cert = GetCertificate(certClient, secretClient, certName);
+                    return result.AccessToken;
+                }
 
-                Console.WriteLine("Certificate loaded");
-                var app2 = ConfidentialClientApplicationBuilder.Create(clientId)
-                    .WithCertificate(cert)
-                    .WithAuthority(tenantAuthority)
-                    .Build();
+                else if (authMethod.Equals("Deligaded_Token"))
+                {
+                    scopes = new [] { "https://analysis.windows.net/powerbi/api/Tenant.Read.All" };
+                    
+                    var appBuilder = PublicClientApplicationBuilder
+                        .Create(clientId)
+                        .WithAuthority(tenantAuthority)
+                        .WithRedirectUri("http://localhost")
+                        .Build();
 
-                var result2 = await app2.AcquireTokenForClient(scopes)
-                    .ExecuteAsync();
-                Instance.accessToken = result2.AccessToken;
-                int x = 0;
+                    var result = await appBuilder.AcquireTokenInteractive(scopes)
+                                        .WithUseEmbeddedWebView(false)
+                                        .ExecuteAsync();
 
-                return result2.AccessToken;
+                    Instance.accessToken = result.AccessToken;
 
-
-
-                //var identifer = new KeyVaultSecretIdentifier(certResp.Value.SecretId);
-
-                //var secretClient = new SecretClient(keyVaultUrl, creds);
-                //var secretResp = secretClient.GetSecret(identifer.Name, identifer.Version);
-
-                //byte[] privateKeyBytes = Convert.FromBase64String(secretResp.Value.Value);
-
-                //var cert = new X509Certificate2(privateKeyBytes);
-
-
-
-                //return result.AccessToken;
-
-
-                ///// Service Principal with secret////
-
-                //var app = ConfidentialClientApplicationBuilder.Create(clientId)
-                //    .WithClientSecret(clientSecret)
-                //    .WithAuthority(tenantAuthority)
-                //    .Build();
-
-
-                //scopes = new[] { "https://analysis.windows.net/powerbi/api/.default" };
-                //var result = await app.AcquireTokenForClient(scopes)
-                //    .ExecuteAsync();
-
-                //Instance.accessToken = result.AccessToken;
-
-                /////////////// deligated ////
-                //IPublicClientApplication app = PublicClientApplicationBuilder
-                //    .Create(clientId)
-                //    .WithAuthority(tenantAuthority)
-                //    .WithRedirectUri(redirectUri)
-                //    .Build();
-
-                //var result = await app.AcquireTokenInteractive(scopes)
-                //                    .WithUseEmbeddedWebView(false)
-                //                    .ExecuteAsync();
-
-                //Instance.accessToken = result.AccessToken;
-                //return result.AccessToken;
-
+                    return result.AccessToken;
+                }
+                else
+                {
+                    throw new Exception("The authentication method should be Service_Principal or Deligaded_Token.");
+                }
             }
-
             catch (Exception ex)
             {
                 throw new ScanningException(apiName, ex.Message);

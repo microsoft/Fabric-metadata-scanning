@@ -19,7 +19,7 @@ This is a template. Feel free to adjust and modify it for your needs.
 5. On the left bar click on API permissions.
 6. Add Permission -> Power BI Service
 7. This system manged only Delegated Permission currently, so click on that.
-8. Search for "Tenant" and check both Tenant.Read.All and Tenant.ReadWrite.All permissions.
+8. Search for "Tenant" and check Tenant.Read.All permissions.
 
 ![img](https://github.com/microsoft/Fabric-metadata-scanning/blob/main/Fabric-metadata-scanning/images/add_permission.png)
 
@@ -36,13 +36,13 @@ This is a template. Feel free to adjust and modify it for your needs.
 
 ## How To Run
 
-	1. Clone or download the files.
-	2. Set the configurations you would like to use: The system limits are written in the example configuration file.
-	3. From Fabric-metadata-scanning\Fabric-metadata-scanning folder, run "dotnet run <configuration file path>" (without the quotes). If no <configuration file path> specified, the system use the example config file location.
-	   For Example: cd Fabric-metadata-scanning; dotnet run configurationsFile.json
-	4. The system will ask you to autheticate with your admin credentials.
-	5. After each run, the configuration "modifiedSince" would be set to the current time. IMPORTANT - to enable the incremental scan(set modifiedSince parameter to the last run time automatically) on debug also, set the configuration file property 'Copy to Output Directory' value  to 'Copy if newer'.
-	6. Once finished, the output file path would be printed to the console.
+1. Clone or download the files.
+2. Set the configurations you would like to use: The system limits are written in the example configuration file.
+3. From Fabric-metadata-scanning\Fabric-metadata-scanning folder, run "dotnet run <configuration file path>" (without the quotes). If no <configuration file path> specified, the system use the example config file location.
+For Example: cd Fabric-metadata-scanning; dotnet run
+4. The system will ask you to autheticate with your admin credentials.
+5. After each run, the configuration "modifiedSince" would be set to the current time. IMPORTANT - to enable the incremental scan(set modifiedSince parameter to the last run time automatically) on debug also, set the configuration file property 'Copy to Output Directory' value  to 'Copy if newer'.
+6. Once finished, the output file path would be printed to the console.  
 
 ## Modified Workspaces API
 
@@ -76,4 +76,4 @@ This is a template. Feel free to adjust and modify it for your needs.
 The software may collect information about you and your use of the software and send it to Microsoft. 
 Microsoft may use this information to provide services and improve our products and services. You may turn off the telemetry as described in the repository. 
 There are also some features in the software that may enable you and Microsoft to collect data from users of your applications. 
-If you use these features, you must comply with applicable law, including providing appropriate notices to users of your applications together with a copy of Microsoft’s privacy statement. Our privacy statement is located at https://go.microsoft.com/fwlink/?LinkID=824704. You can learn more about data collection and use in the help documentation and our privacy statement. Your use of the software operates as your consent to these practices.
+If you use these features, you must comply with applicable law, including providing appropriate notices to users of your applications together with a copy of Microsoftâ€™s privacy statement. Our privacy statement is located at https://go.microsoft.com/fwlink/?LinkID=824704. You can learn more about data collection and use in the help documentation and our privacy statement. Your use of the software operates as your consent to these practices.
