@@ -28,7 +28,7 @@ namespace Fabric_Metadata_Scanning
             setRequestParameters();
         }
 
-        public override async Task<object> run(string? placeHolder)
+        public override async Task<object> run(string scanId = null)
         {
             int start;
             int length;
@@ -80,7 +80,7 @@ namespace Fabric_Metadata_Scanning
                     JObject scanDetails = JObject.Parse(scanDetailsString);
                     JToken token = scanDetails["id"];
 
-                    string scanId = token.Value<string>();
+                    scanId = token.Value<string>();
 
                     return scanId;
 

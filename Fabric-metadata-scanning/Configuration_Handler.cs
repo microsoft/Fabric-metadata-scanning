@@ -3,7 +3,6 @@ using Newtonsoft.Json.Linq;
 
 namespace Fabric_Metadata_Scanning
 {
-
     public sealed class Configuration_Handler
     {
         private static Configuration_Handler instance = null;
@@ -13,10 +12,7 @@ namespace Fabric_Metadata_Scanning
         public JObject _configurationSettings { get; set; }
         public DateTime scanStartTime { get; set; }
 
-        private Configuration_Handler()
-        {
-
-        }
+        private Configuration_Handler(){}
 
         public static Configuration_Handler Instance
         {
@@ -64,43 +60,44 @@ namespace Fabric_Metadata_Scanning
 
         private void validateConfigs()
         {
-            int threadsCount = getConfig("shared", "threadsCount").Value<int>();
+            string errorMessage;
+
+            var threadsCount = getConfig("shared", "threadsCount").Value<int>();
             if (threadsCount < 1 || threadsCount > 16)
             {
-                string errorMessage = "The number of threads need to be between 1-16.";
+                errorMessage = "The number of threads need to be between 1-16.";
                 throw new ScanningException("Configurations", errorMessage);
             }
 
             int defaultRetryAfter = getConfig("shared", "defaultRetryAfter").Value<int>();
             if (defaultRetryAfter <= 0)
             {
-                string errorMessage = "The defaultRetryAfter need to be a positive number.";
+                errorMessage = "The defaultRetryAfter need to be a positive number.";
                 throw new ScanningException("Configurations", errorMessage);
             }
-
 
             bool datasetExpressions = getConfig("getInfo", "datasetExpressions").Value<bool>();
             bool datasetSchema = getConfig("getInfo", "datasetSchema").Value<bool>();
             if (datasetExpressions && !datasetSchema)
             {
-                string errorMessage = "datasetSchema can not set to false while datasetExpressions is set to true";
+                errorMessage = "datasetSchema can not set to false while datasetExpressions is set to true";
                 throw new ScanningException("getInfo", errorMessage);
             }
 
             int chunkMaxSize = getConfig("getInfo", "chunkMaxSize").Value<int>();
             if (chunkMaxSize < 1 || chunkMaxSize > 100)
             {
-                string errorMessage = "The number of threads need to be between 1-100.";
+                errorMessage = "The number of threads need to be between 1-100.";
                 throw new ScanningException("getInfo", errorMessage);
             }
 
-
-
-        }
-
-        public JObject getApiSettings(string apiName)
-        {
-            return (JObject)_configurationSettings[apiName];
+            var authMethod = getConfig("auth", "authMethod").Value<string>();
+            var optionalAuthMethods = new [] { "Service_Principal", "Deligaded_Token" };
+            if (!optionalAuthMethods.Contains(authMethod))
+            {
+                errorMessage = "The authentication method should be Service_Principal or Deligaded_Token.";
+                throw new ScanningException("auth", errorMessage);
+            }
         }
 
         public JToken getConfig(string apiName, string parameterName)
@@ -112,7 +109,7 @@ namespace Fabric_Metadata_Scanning
             }
             else
             {
-                return null;
+                throw new ScanningException(apiName, $"Can't get config of {apiName} called {parameterName}");
             }
         }
 
@@ -125,10 +122,4 @@ namespace Fabric_Metadata_Scanning
             File.WriteAllText(_configurationFilePath, jsonString);
         }
     }
-
-
-
-
-
-
 }

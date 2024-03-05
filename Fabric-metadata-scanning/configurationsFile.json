@@ -5,11 +5,17 @@
   },
   "auth": {
     "clientId": "<your client id>",
-    "tenantId": "<your tenant id>"
+    "tenantId": "<your tenant id>",
+    "authMethod": "Service_Principal", // Service_Principal or Deligaded_Token
+
+    //For Service Principal only.
+    "keyVaultName": "<your key vault name>",
+    "secretName": "<your key vault secret name>",
+    "certificateName": "<your key vault certificate name>"
   },
   "modified": {
     "outputFolder": "outputs\\ModifiedWorkspaces",
-    "modifiedSince": "2023-12-14T07:19:11.0718286Z",
+    "modifiedSince": "2024-03-04T07:19:11.0718286Z",
     "alwaysFullScan": false,
     "excludeInactiveWorkspaces": false,
     "excludePersonalWorkspaces": false,

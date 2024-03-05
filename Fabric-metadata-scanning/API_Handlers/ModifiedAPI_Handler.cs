@@ -33,7 +33,7 @@ namespace Fabric_Metadata_Scanning
             }
         }
 
-        public override async Task<object> run(string? placeHolder)
+        public override async Task<object> run(string scanId = null)
         {
             HttpResponseMessage response = await sendGetRequest("");
 

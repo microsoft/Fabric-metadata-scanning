@@ -1,10 +1,21 @@
 ﻿using Fabric_Metadata_Scanning;
+using Microsoft.Identity;
+using Microsoft.Identity.Client;
 using Newtonsoft.Json.Linq;
+
+using Microsoft.Azure.KeyVault;
+using System.Security.Cryptography.X509Certificates;
+using static System.Formats.Asn1.AsnWriter;
+using Azure.Security.KeyVault.Certificates;
 
 class Program
 {
     private static SemaphoreSlim threadPool;
     private static WorkspaceInfoAPI_Handler workspaceInfoAPI;
+
+    // Preparing needed variables
+    public string Scope = "https://analysis.windows.net/powerbi/api/.default";
+    
 
     static async Task Main(string[] args)
     {
@@ -12,16 +23,13 @@ class Program
         {
             Configuration_Handler configuration_handler = Configuration_Handler.Instance;
             configuration_handler.setConfigurationsFile(args);
-
-            Auth_Handler authHandler = new Auth_Handler();
+            await Auth_Handler.Instance.authenticate();
             ModifiedAPI_Handler modifiedAPI = new ModifiedAPI_Handler();
 
             int threadsCount = Configuration_Handler.Instance.getConfig("shared", "threadsCount").Value<int>();
             threadPool = new SemaphoreSlim(threadsCount, threadsCount); ;
 
-            string accessToken = await authHandler.authenticate();
-
-            string workspacesFilePath = (string)await modifiedAPI.run(null);
+            string workspacesFilePath = (string)await modifiedAPI.run();
             if (Equals(workspacesFilePath,null)) // No workspaces found.
             {
                 return;
@@ -55,9 +63,9 @@ class Program
 
         static async Task runAPIs(object? num)
         {
-            threadPool.WaitAsync();
+            await threadPool.WaitAsync();
             string scanId;
-            while (!Equals(scanId = (string)await workspaceInfoAPI.run(null), "Done"))
+            while (!Equals(scanId = (string)await workspaceInfoAPI.run(), "Done"))
             {
                 while (scanId == null)
                 {
