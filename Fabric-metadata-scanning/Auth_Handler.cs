@@ -1,25 +1,9 @@
-﻿using Microsoft.Azure.KeyVault.Models;
-using Microsoft.Azure.KeyVault;
-using Microsoft.Identity.Client;
+﻿using Microsoft.Identity.Client;
 using Newtonsoft.Json.Linq;
 using System.Security.Cryptography.X509Certificates;
 using Azure.Identity;
-using static System.Formats.Asn1.AsnWriter;
 using Azure.Security.KeyVault.Secrets;
 using Azure.Security.KeyVault.Certificates;
-using System.Net.Sockets;
-using Microsoft.Rest.Azure;
-using Azure.Core;
-using Microsoft.Rest;
-using Microsoft.PowerBI.Api;
-using System.Runtime.ConstrainedExecution;
-using Azure;
-using System;
-using Microsoft.Azure.KeyVault;
-using System.Security.Cryptography.X509Certificates;
-using Microsoft.IdentityModel.Clients.ActiveDirectory;
-using Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos;
-using System.Text;
 
 namespace Fabric_Metadata_Scanning
 {

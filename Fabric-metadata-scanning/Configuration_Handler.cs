@@ -3,7 +3,6 @@ using Newtonsoft.Json.Linq;
 
 namespace Fabric_Metadata_Scanning
 {
-
     public sealed class Configuration_Handler
     {
         private static Configuration_Handler instance = null;
