@@ -7,43 +7,15 @@ using Azure.Security.KeyVault.Certificates;
 
 namespace Fabric_Metadata_Scanning
 {
-    public class CertificateDownloader
-    {
-        private readonly HttpClient httpClient;
-
-        public CertificateDownloader()
-        {
-            httpClient = new HttpClient();
-        }
-
-        public async Task<X509Certificate2> GetCertificateAsync(string url)
-        {
-            // Perform asynchronous operation to download certificate from the specified URL
-            HttpResponseMessage response = await httpClient.GetAsync(url);
-
-            if (response.IsSuccessStatusCode)
-            {
-                // Read the certificate content as bytes
-                byte[] certificateBytes = await response.Content.ReadAsByteArrayAsync();
-
-                // Create X509Certificate2 instance from the downloaded bytes
-                X509Certificate2 certificate = new X509Certificate2(certificateBytes);
-
-                return certificate;
-            }
-            else
-            {
-                // Handle error scenario, e.g., certificate not found or inaccessible
-                throw new Exception($"Failed to download certificate. HTTP status code: {response.StatusCode}");
-            }
-        }
-    }
-
     class Auth_Handler
     {
         private static Auth_Handler instance = null;
         private static object lockObject = new object();
-        private Auth_Handler() {}
+
+        private Auth_Handler()
+        {
+            apiName = "auth";
+        }
 
         public static Auth_Handler Instance
         {
@@ -62,7 +34,8 @@ namespace Fabric_Metadata_Scanning
                 return instance;
             }
         }
-        public string apiName = "auth";
+
+        public string apiName { get; }
         public string accessToken { get; set; }
 
         private static X509Certificate2 GetCertificate(CertificateClient certificateClient,SecretClient secretClient,string certificateName)
@@ -107,13 +80,13 @@ namespace Fabric_Metadata_Scanning
                     Uri keyVaultUri = new Uri($"https://{keyVaultName}.vault.azure.net");
 
                     var keyVaultSecretClient = new SecretClient(keyVaultUri, new DefaultAzureCredential());
-                    var secretName = Configuration_Handler.Instance.getConfig(apiName, "secretName").Value<string>(); ;
+                    var secretName = Configuration_Handler.Instance.getConfig(apiName, "secretName").Value<string>();
                     KeyVaultSecret keyVaultSecret = await keyVaultSecretClient.GetSecretAsync(secretName);
 
                     var credentials = new ClientSecretCredential(tenantId: tenantId, clientId: clientId, clientSecret: keyVaultSecret.Value);
                     var appSecretClient = new SecretClient(keyVaultUri, credentials);
 
-                    var certificateName = Configuration_Handler.Instance.getConfig(apiName, "certificateName").Value<string>(); ;
+                    var certificateName = Configuration_Handler.Instance.getConfig(apiName, "certificateName").Value<string>();
                     var certificateClient = new CertificateClient(keyVaultUri, credentials);
                     var certificate = GetCertificate(certificateClient, appSecretClient, certificateName);
 

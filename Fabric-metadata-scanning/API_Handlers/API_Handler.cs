@@ -19,18 +19,18 @@ namespace Fabric_Metadata_Scanning
         
         public abstract Task<object> run(string scanId = null);
 
-        public async Task<HttpResponseMessage> sendGetRequest(string? scanId)
+        public async Task<HttpResponseMessage> sendGetRequest(string scanId = null)
         {
             using (HttpClient httpClient = new HttpClient())
             {
                 HttpResponseMessage response;
                 setHeaders(httpClient);
+                string scanIdValue = scanId != null ? scanId : "";
                 do
                 {
-                    response = await httpClient.GetAsync(apiUriBuilder.Uri + $"/{scanId}");
+                    response = await httpClient.GetAsync(apiUriBuilder.Uri + $"/{scanIdValue}");
 
                 } while (!await verifySuccess(response));
-                
 
                 return response;
             }
@@ -50,7 +50,6 @@ namespace Fabric_Metadata_Scanning
 
         public async Task<bool> verifySuccess(HttpResponseMessage response)
         {
-
             if (!response.IsSuccessStatusCode)
             {
                 if((int)response.StatusCode == 429)

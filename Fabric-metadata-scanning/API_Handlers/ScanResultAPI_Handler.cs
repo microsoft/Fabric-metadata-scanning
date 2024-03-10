@@ -49,13 +49,12 @@ namespace Fabric_Metadata_Scanning
             }
         }
 
-        public override async Task<object> run(string? scanId)
+        public override async Task<object> run(string scanId = null)
         {
             HttpResponseMessage response = await sendGetRequest(scanId);
 
             string jsonResponse = await response.Content.ReadAsStringAsync();
             JObject resultObject = JObject.Parse(jsonResponse);
-
 
             if (resultObject["datasourceInstances"] != null && !sharedResult.ContainsKey("datasourceInstances"))
             {
@@ -101,7 +100,6 @@ namespace Fabric_Metadata_Scanning
 
                         if (propertyValue is JArray artifactsArray && artifactsArray.Count > 0)
                         {
-
                             if (artifactsCounters.ContainsKey(propertyName))
                             {
                                 artifactsCounters[propertyName] += artifactsArray.Count;
@@ -120,7 +118,6 @@ namespace Fabric_Metadata_Scanning
             //finished
             if (workspacesArray.Count < Configuration_Handler.Instance.getConfig("getInfo", "chunkMaxSize").Value<int>())
             {
-
                 lock (lockObject)
                 {
                     JObject artifacts = new JObject

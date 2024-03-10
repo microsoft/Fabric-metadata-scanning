@@ -26,43 +26,6 @@
     "warehouses": 4,
     "SQLAnalyticsEndpoint": 32,
     "users": 4
-  },
-  "datasourceInstances": [
-    {
-      "datasourceType": "",
-      "connectionDetails": {
-        "extensionDataSourceKind": "extensionDataSourceKind",
-        "extensionDataSourcePath": "extensionDataSourcePath"
-      },
-      "datasourceId": "datasourceId",
-      "gatewayId": "gatewayId"
-    },
-    {
-      "datasourceType": "Sql",
-      "connectionDetails": {
-        "server": "server",
-        "database": "database"
-      },
-      "datasourceId": "datasourceId",
-      "gatewayId": "gatewayId"
-    },
-    {
-      "datasourceType": "Web",
-      "connectionDetails": {
-        "url": "url"
-      },
-      "datasourceId": "datasourceId",
-      "gatewayId": "gatewayId"
-    }
-  ],
-  "misconfiguredDatasourceInstances": [
-    {
-      "datasourceType": "datasourceType",
-      "connectionDetails": {
-        "path": "path",
-        "kind": "kind"
-      },
-      "datasourceId": "datasourceId"
-    }
+  }
   ]
 }
