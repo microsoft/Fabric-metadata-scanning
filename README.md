@@ -25,7 +25,7 @@ This is a template. Feel free to adjust and modify it for your needs.
 9. Create a certificate in the Key Vault (Certificates -> Generate/Import -> pick certificate name and subject -> Generate). Use the key vault, secret and certificate names in the configuration file.
 10. Download the current version of the certificate to your local machine.
 11. Go back to your app and upload the certificate (Certificates & secrets -> Certificates -> Upload certificate).
-12. Create a security group (https://learn.microsoft.com/en-us/entra/fundamentals/how-to-manage-groups#create-a-basic-group-and-add-members) , and add your app as a member.
+12. [Create a security group](https://learn.microsoft.com/en-us/entra/fundamentals/how-to-manage-groups#create-a-basic-group-and-add-members) , and add your app as a member.
 13. Go to Fabric(Power BI) portal, click on Settings -> Admin portal -> Developer Settings -> Embed content in apps. Choose Specific security groups (recommended) and add your security group to the list.
 
 ### Using Deligaded Token (Specific user):
