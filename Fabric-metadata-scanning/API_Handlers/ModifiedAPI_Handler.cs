@@ -35,7 +35,7 @@ namespace Fabric_Metadata_Scanning
 
         public override async Task<object> run(string scanId = null)
         {
-            HttpResponseMessage response = await sendGetRequest("");
+            HttpResponseMessage response = await sendGetRequest();
 
             //The parameter modifiedSince should be in iso8601 format
             string iso8601Time = Configuration_Handler.Instance.scanStartTime.ToString("O");
