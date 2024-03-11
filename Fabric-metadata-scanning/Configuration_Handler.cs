@@ -92,10 +92,10 @@ namespace Fabric_Metadata_Scanning
             }
 
             var authMethod = getConfig("auth", "authMethod").Value<string>();
-            var optionalAuthMethods = new [] { "Service_Principal", "Deligated_Token" };
+            var optionalAuthMethods = new [] { "Service_Principal", "Delegated_Token" };
             if (!optionalAuthMethods.Contains(authMethod))
             {
-                errorMessage = "The authentication method should be Service_Principal or Deligated_Token.";
+                errorMessage = "The authentication method should be Service_Principal or Delegated_Token.";
                 throw new ScanningException("auth", errorMessage);
             }
         }

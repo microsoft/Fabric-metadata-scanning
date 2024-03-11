@@ -102,7 +102,7 @@ namespace Fabric_Metadata_Scanning
                     return result.AccessToken;
                 }
 
-                else if (authMethod.Equals("Deligaded_Token"))
+                else if (authMethod.Equals("Delegated_Token"))
                 {
                     scopes = new [] { "https://analysis.windows.net/powerbi/api/Tenant.Read.All" };
                     
@@ -122,7 +122,7 @@ namespace Fabric_Metadata_Scanning
                 }
                 else
                 {
-                    throw new Exception("The authentication method should be Service_Principal or Deligaded_Token.");
+                    throw new Exception("The authentication method should be Service_Principal or Delegated_Token.");
                 }
             }
             catch (Exception ex)
