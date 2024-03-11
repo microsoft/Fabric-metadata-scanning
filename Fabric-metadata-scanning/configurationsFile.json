@@ -6,7 +6,7 @@
   "auth": {
     "clientId": "<your client id>",
     "tenantId": "<your tenant id>",
-    "authMethod": "Service_Principal", // Service_Principal or Deligaded_Token
+    "authMethod": "Service_Principal", // Service_Principal or Delegated_Token
 
     //For Service Principal only.
     "keyVaultName": "<your key vault name>",
