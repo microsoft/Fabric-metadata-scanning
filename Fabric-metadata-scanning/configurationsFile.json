@@ -4,14 +4,14 @@
     "defaultRetryAfter": 500
   },
   "auth": {
-    "clientId": "a4a71eb0-7baa-426d-a5aa-64962d965fa1",
-    "tenantId": "82e09e3a-99a6-4ec0-a928-e8a90bcd1515",
+    "clientId": "<your client id>",
+    "tenantId": "<your tenant id>",
     "authMethod": "Service_Principal", // Service_Principal or Deligaded_Token
 
     //For Service Principal only.
-    "keyVaultName": "fabric-md-sample-app-kv",
-    "secretName": "Fabric-metadata-scanning-sample-app-kv-secret",
-    "certificateName": "Fabric-metadata-scanning-sample-app-kv-cert"
+    "keyVaultName": "<your key vault name>",
+    "secretName": "<your key vault secret name>",
+    "certificateName": "<your key vault certificate name>"
   },
   "modified": {
     "outputFolder": "outputs\\ModifiedWorkspaces",
