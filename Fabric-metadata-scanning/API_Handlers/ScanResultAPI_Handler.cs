@@ -13,7 +13,7 @@ namespace Fabric_Metadata_Scanning
 
         private object lockObject = new object();
         public Dictionary<string, int> artifactsCounters { get; set; }
-        public JObject sharedResult = new JObject();
+        public JObject datasources = new JObject();
 
         private ScanResultAPI_Handler() : base("scanResult")
         {
@@ -35,6 +35,9 @@ namespace Fabric_Metadata_Scanning
             {
                 { "workspaces" , 0 }
             };
+
+            datasources["datasourceInstances"] = new JArray();
+            datasources["misconfiguredDatasourceInstances"] = new JArray();
         }
 
         public static ScanResultAPI_Handler Instance
@@ -56,14 +59,15 @@ namespace Fabric_Metadata_Scanning
             string jsonResponse = await response.Content.ReadAsStringAsync();
             JObject resultObject = JObject.Parse(jsonResponse);
 
-            if (resultObject["datasourceInstances"] != null && !sharedResult.ContainsKey("datasourceInstances"))
+            
+            if (resultObject["datasourceInstances"] != null )
             {
-                sharedResult["datasourceInstances"] = resultObject["datasourceInstances"];
+                ((JArray) datasources["datasourceInstances"]).Add(resultObject["datasourceInstances"]);
             }
-
-            if (resultObject["misconfiguredDatasourceInstances"] != null && !sharedResult.ContainsKey("misconfiguredDatasourceInstances"))
+            
+            if (resultObject["misconfiguredDatasourceInstances"] != null )
             {
-                sharedResult["misconfiguredDatasourceInstances"] = resultObject["misconfiguredDatasourceInstances"];
+                ((JArray)datasources["misconfiguredDatasourceInstances"]).Add(resultObject["misconfiguredDatasourceInstances"]);
             }
 
             JArray workspacesArray = (JArray)resultObject["workspaces"];
@@ -126,13 +130,6 @@ namespace Fabric_Metadata_Scanning
                         {"Artifacts amounts",JObject.FromObject(this.artifactsCounters) }
                     };
 
-                    JObject datasources = new JObject
-                    {
-                        { "datasourceInstances", null },
-                        { "misconfiguredDatasourceInstances", null }
-                    };
-
-
                     string finalResultsDileDirPath = $"{resultStatusPath}\\{resultTime}";
                     Directory.CreateDirectory(finalResultsDileDirPath);
 
@@ -146,15 +143,7 @@ namespace Fabric_Metadata_Scanning
                         serializer.Serialize(file, artifacts);
                     }
 
-                    if (sharedResult["datasourceInstances"] != null)
-                    {
-                        datasources["datasourceInstances"] = sharedResult["datasourceInstances"];
-                    }
 
-                    if (sharedResult["misconfiguredDatasourceInstances"] != null)
-                    {
-                        datasources["misconfiguredDatasourceInstances"] = sharedResult["misconfiguredDatasourceInstances"];
-                    }
                     using (StreamWriter file = File.CreateText($"{finalResultsDileDirPath}\\datasources.json"))
                     {
                         JsonSerializer serializer = new JsonSerializer

@@ -13,10 +13,6 @@ class Program
     private static SemaphoreSlim threadPool;
     private static WorkspaceInfoAPI_Handler workspaceInfoAPI;
 
-    // Preparing needed variables
-    public string Scope = "https://analysis.windows.net/powerbi/api/.default";
-    
-
     static async Task Main(string[] args)
     {
         try
