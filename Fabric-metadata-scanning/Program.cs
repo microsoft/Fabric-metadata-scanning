@@ -1,12 +1,5 @@
 ﻿using Fabric_Metadata_Scanning;
-using Microsoft.Identity;
-using Microsoft.Identity.Client;
 using Newtonsoft.Json.Linq;
-
-using Microsoft.Azure.KeyVault;
-using System.Security.Cryptography.X509Certificates;
-using static System.Formats.Asn1.AsnWriter;
-using Azure.Security.KeyVault.Certificates;
 
 class Program
 {
