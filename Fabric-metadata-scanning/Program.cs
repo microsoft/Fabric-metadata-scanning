@@ -1,21 +1,10 @@
 ﻿using Fabric_Metadata_Scanning;
-using Microsoft.Identity;
-using Microsoft.Identity.Client;
 using Newtonsoft.Json.Linq;
-
-using Microsoft.Azure.KeyVault;
-using System.Security.Cryptography.X509Certificates;
-using static System.Formats.Asn1.AsnWriter;
-using Azure.Security.KeyVault.Certificates;
 
 class Program
 {
     private static SemaphoreSlim threadPool;
     private static WorkspaceInfoAPI_Handler workspaceInfoAPI;
-
-    // Preparing needed variables
-    public string Scope = "https://analysis.windows.net/powerbi/api/.default";
-    
 
     static async Task Main(string[] args)
     {
