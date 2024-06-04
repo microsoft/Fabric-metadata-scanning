@@ -22,23 +22,23 @@ This is a template. Feel free to adjust and modify it for your needs.
 ![img](https://github.com/microsoft/Fabric-metadata-scanning/blob/main/Fabric-metadata-scanning/images/clientId.png)
 
 ### Using Service Principal(Recommended):
-5. On the app's left bar click on Certificates & secrets and create new client secret. You will get a secret value, copy that value to a safe place.
-6. In Azure Portal create a Key Vault (under your/new Resource Group).
-7. Set access: In the Key Vault left bar under access control, add yourself as a Key Vault Administrator role assignment, and your application as Key Vault Certificate User.
-8. Create a secret inside the Key Vault (Secrets -> Generate/Import -> paste the secret value you copied in step 5 and pick you secret name -> Create).
-9. Create a certificate in the Key Vault (Certificates -> Generate/Import -> pick certificate name and subject -> Generate). Use the key vault, secret and certificate names in the configuration file.
-10. Download the current version of the certificate to your local machine (Certificates -> [Certificate Name] -> [Version Number] -> Download in CER format).
-11. Go back to your app and upload the certificate (Certificates & secrets -> Certificates -> Upload certificate).
-12. [Create a security group](https://learn.microsoft.com/en-us/entra/fundamentals/how-to-manage-groups#create-a-basic-group-and-add-members) , and add your app as an member and yourself as an Owner.
-13. Go to Fabric(Power BI) portal, click on Settings -> Admin portal -> Admin API settings.
+6. On the app's left bar click on Certificates & secrets and create new client secret. You will get a secret value, copy that value to a safe place.
+7. In Azure Portal create a Key Vault (under your/new Resource Group).
+8. Set access: In the Key Vault left bar under access control, add yourself as a Key Vault Administrator role assignment, and your application as Key Vault Certificate User.
+9. Create a secret inside the Key Vault (Secrets -> Generate/Import -> paste the secret value you copied in step 5 and pick you secret name -> Create).
+10. Create a certificate in the Key Vault (Certificates -> Generate/Import -> pick certificate name and subject -> Generate). Use the key vault, secret and certificate names in the configuration file.
+11. Download the current version of the certificate to your local machine (Certificates -> [Certificate Name] -> [Version Number] -> Download in CER format).
+12. Go back to your app and upload the certificate (Certificates & secrets -> Certificates -> Upload certificate).
+13. [Create a security group](https://learn.microsoft.com/en-us/entra/fundamentals/how-to-manage-groups#create-a-basic-group-and-add-members) , and add your app as an member and yourself as an Owner.
+14. Go to Fabric(Power BI) portal, click on Settings -> Admin portal -> Admin API settings.
     Enable Admin Switches: Enhance admin APIs responses with detailed metadata, Service principals can access read-only admin APIs, choose Specific
     security groups (recommended) and add your security group to the list (for both switches).
 
 ### Using Deligaded Token (Specific user):
-5. On the app's left bar click on API permissions.
-6. Add Permission -> Power BI Service
-7. This system manged only Delegated Permission currently, so click on that.
-8. Search for "Tenant" and check Tenant.Read.All permissions.
+6. On the app's left bar click on API permissions.
+7. Add Permission -> Power BI Service
+8. This system manged only Delegated Permission currently, so click on that.
+9. Search for "Tenant" and check Tenant.Read.All permissions.
 
 ![img](https://github.com/microsoft/Fabric-metadata-scanning/blob/main/Fabric-metadata-scanning/images/add_permission.png)
 
