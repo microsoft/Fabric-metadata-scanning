@@ -18,6 +18,9 @@ This is a template. Feel free to adjust and modify it for your needs.
 
 4. Set the name and supported account types and click Register.
 5. On the left bar, go to Overview, and copy the Application (client) ID and Directory (tenant) ID to the configuration file (under "auth").
+6. Go to Fabric(Power BI) portal, click on Settings -> Admin portal -> Admin API settings.
+   Enable Admin Switches: Enhance admin APIs responses with detailed metadata, choose Specific
+   security groups (recommended) and add your security group to the list (for both switches).
 
 ![img](https://github.com/microsoft/Fabric-metadata-scanning/blob/main/Fabric-metadata-scanning/images/clientId.png)
 
