@@ -30,6 +30,7 @@
     "getArtifactUsers": true,
     "lineage": true,
     "getTridentArtifacts": true,
+    "reportObjects": true,
     "requestsLimit": 500,
     "limitDurationInMinutes": 60
   },
