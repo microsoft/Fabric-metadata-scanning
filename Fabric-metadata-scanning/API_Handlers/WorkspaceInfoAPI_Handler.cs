@@ -24,6 +24,7 @@ namespace Fabric_Metadata_Scanning
             parameters.Add("getArtifactUsers", Configuration_Handler.Instance.getConfig(apiName, "getArtifactUsers").Value<bool>());
             parameters.Add("lineage", Configuration_Handler.Instance.getConfig(apiName, "lineage").Value<bool>());
             parameters.Add("getTridentArtifacts", Configuration_Handler.Instance.getConfig(apiName, "getTridentArtifacts").Value<bool>());
+            parameters.Add("reportObjects", Configuration_Handler.Instance.getConfig(apiName, "reportObjects").Value<bool>());
 
             setRequestParameters();
         }
