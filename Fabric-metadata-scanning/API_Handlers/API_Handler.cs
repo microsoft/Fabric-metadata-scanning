@@ -75,24 +75,17 @@ namespace Fabric_Metadata_Scanning
                     return true;
                 }
 
-                try
+                var jsonString = await response.Content.ReadAsStringAsync();
+                dynamic errorObject = JObject.Parse(jsonString);
+                if (errorObject?.error.details != null && errorObject.error.details.Count > 0)
                 {
-                    var jsonString = await response.Content.ReadAsStringAsync();
-                    dynamic errorObject = JObject.Parse(jsonString);
-                    if (errorObject?.error.details != null && errorObject.error.details.Count > 0)
-                    {
-                        string errorMessage = errorObject?.error.details[0].message;
-                        throw new ScanningException(apiName, errorMessage);
-                    }
-                    else
-                    {
-                        string errorMessage = errorObject?.error.message;
-                        throw new ScanningException(apiName, errorMessage);
-                    }
+                    string errorMessage = errorObject?.error.details[0].message;
+                    throw new ScanningException(apiName, errorMessage);
                 }
-                catch
+                else
                 {
-                    return false;
+                    string errorMessage = errorObject?.error.message;
+                    throw new ScanningException(apiName, errorMessage);
                 }
             }
             return true;
