@@ -3,7 +3,7 @@ using Microsoft.PowerBI.Api.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Text.Json.Nodes;
-using static System.Net.Mime.MediaTypeNames;
+using System.Globalization;
 
 namespace Fabric_Metadata_Scanning
 {
@@ -120,12 +120,10 @@ namespace Fabric_Metadata_Scanning
                 { "heatMap", true},            
             };
 
-            string orgStoreUri = Configuration_Handler.Instance.getConfig("orgVisuals", "uri").Value<string>();
-            string token = Configuration_Handler.Instance.getConfig("orgVisuals", "token").Value<string>();
+            string orgStoreFile = Configuration_Handler.Instance.getConfig("orgVisuals", "fileLocation").Value<string>();
 
-            //orgStoreVisuals =
             var orgStore_handler = new OrgStore_handler();
-            orgStoreVisuals = orgStore_handler.GetOrgStoreContentAsync(orgStoreUri, token).Result;
+            orgStoreVisuals = orgStore_handler.GetOrgStoreContent(orgStoreFile);
 
         }
 
@@ -198,81 +196,10 @@ namespace Fabric_Metadata_Scanning
 
                             if (enrichVisuals && propertyName.Contains("reports"))
                             {
-                                foreach (var report in artifactsArray)
-                                {
-                                    var reportSections = report["sections"];
-                                    if (reportSections != null)
-                                    {
-                                        if (reportSections is JArray sectionArray && sectionArray.Count > 0)
-                                        {
-                                            foreach (var section in sectionArray)
-                                            {
-                                                var sectionVisuals = section["visuals"];
-                                                if (sectionVisuals != null && sectionVisuals is JArray visualArray && visualArray.Count > 0)
-                                                {
-                                                    foreach (var visual in visualArray)
-                                                    {
-                                                        var visualId = visual["visualGuid"];
-                                                        if (visualId != null)
-                                                        {
-                                                            var visualGUID = visualId.Value<string>();
-                                                            var orgStoreVisual = orgStoreVisuals.FirstOrDefault(v => v.name == visualGUID);
-                                                            if (orgStoreVisual != null)
-                                                            {
-                                                                workspaceHaveReportsWithOrgCV = true;
-                                                                visual["isOrgStore"] = true;
-                                                                visual["originalVisualGUID"] = visualGUID.Replace("_OrgStore", "");
-                                                                visual["name"] = orgStoreVisual.displayName;
-                                                            }
-                                                            else
-                                                            {
-                                                                visual["isOrgStore"] = false;
-                                                            }
- 
-                                                            var marketplaceProduct = marketplaceProducts.FirstOrDefault(p => p.PowerBIVisualId == (visual["isOrgStore"].Value<bool>() ? visual["originalVisualGUID"].Value<string>() : visualGUID));
-
-                                                            if (marketplaceProduct != null)
-                                                            {
-                                                                workspaceHaveReportsWithAppSourceCV = true;
-                                                                if (orgStoreVisual == null)
-                                                                {
-                                                                    visual["name"] = marketplaceProduct.DisplayName;
-                                                                }
-                                                                visual["publisher"] = marketplaceProduct.PublisherDisplayName;
-                                                                visual["isCoreVisual"] = false;
-                                                                visual["isAppSource"] = true;
-                                                                visual["IsPrivate"] = false;
-                                                            }
-                                                            else if (coreVisuals.ContainsKey(visualGUID))
-                                                            {
-                                                                visual["name"] = visualId.Value<string>();
-                                                                visual["publisher"] = "Microsoft";
-                                                                visual["isCoreVisual"] = true;
-                                                                visual["isAppSource"] = false;
-                                                                visual["IsPrivate"] = false;
-                                                            }
-                                                            else
-                                                            {
-                                                                workspaceHaveReportsWithPrivateCV = true;
-                                                                if (orgStoreVisual == null)
-                                                                {
-                                                                    visual["name"] = visualId.Value<string>();
-                                                                }
-                                                                visual["isCoreVisual"] = false;
-                                                                visual["isAppSource"] = false;
-                                                                visual["IsPrivate"] = true;
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
+                                enrichReports(ref workspaceHaveReportsWithAppSourceCV, ref workspaceHaveReportsWithOrgCV, ref workspaceHaveReportsWithPrivateCV, artifactsArray);
                             }
                         }
                     }
-
                     artifactsCounters["workspaces"] += 1;
                 }
 
@@ -288,6 +215,8 @@ namespace Fabric_Metadata_Scanning
                     catch { }
                     stream.Close();
                 }
+
+                // Only for debugging
                 if (workspaceHaveReportsWithAppSourceCV && workspaceHaveReportsWithOrgCV && workspaceHaveReportsWithPrivateCV)
                 {
                     if (!Directory.Exists(outputFolderForRepWithCV))
@@ -349,6 +278,96 @@ namespace Fabric_Metadata_Scanning
                 }
             }
             return true;
+        }
+
+        private void enrichReports(ref bool workspaceHaveReportsWithAppSourceCV, ref bool workspaceHaveReportsWithOrgCV, ref bool workspaceHaveReportsWithPrivateCV, JArray artifactsArray)
+        {
+            foreach (var report in artifactsArray)
+            {
+                var reportSections = report["sections"];
+                if (reportSections != null)
+                {
+                    if (reportSections is JArray sectionArray && sectionArray.Count > 0)
+                    {
+                        foreach (var section in sectionArray)
+                        {
+                            var sectionVisuals = section["visuals"];
+                            if (sectionVisuals != null && sectionVisuals is JArray visualArray && visualArray.Count > 0)
+                            {
+                                foreach (var visual in visualArray)
+                                {
+                                    var visualId = visual["visualGuid"];
+                                    visual["isOrgStore"] = false;
+                                    visual["isAppSource"] = false;
+                                    visual["isCoreVisual"] = false;
+                                    visual["isPrivate"] = false;
+                                    visual["isCertified"] = false;
+                                    if (visualId != null)
+                                    {
+                                        var visualGUID = visualId.Value<string>();
+                                        var orgStoreVisual = orgStoreVisuals.FirstOrDefault(v => v.guid == visualGUID);
+                                        if (orgStoreVisual != null)
+                                        {
+                                            workspaceHaveReportsWithOrgCV = true;
+                                            visual["isOrgStore"] = true;
+                                            if (orgStoreVisual.source == "AppSource")
+                                            {
+                                                visual["isAppSource"] = true;
+                                            }
+                                            else
+                                            {
+                                                visual["originalVisualGUID"] = visualGUID.Replace("_OrgStore", "");
+                                                visual["isPrivate"] = true;
+
+                                            }
+                                            visual["name"] = orgStoreVisual.name;
+                                        }
+
+                                        var marketplaceProduct = marketplaceProducts.FirstOrDefault(p => p.PowerBIVisualId == visualGUID);
+
+                                        if (marketplaceProduct != null)
+                                        {
+                                            workspaceHaveReportsWithAppSourceCV = true;
+                                            visual["publisher"] = marketplaceProduct.PublisherDisplayName;
+                                            if (orgStoreVisual == null)
+                                            {
+                                                visual["name"] = marketplaceProduct.DisplayName;
+                                                visual["isCertified"] = (null != marketplaceProduct.EnrichedData.Tags) && marketplaceProduct.EnrichedData.Tags.Contains(MarketplaceProduct.c_powerBICertfied);
+                                            }
+                                            else
+                                            {
+                                            }
+                                            visual["appSourceLink"] = "https://appsource.microsoft.com/" + getLocale() + "/product/PowerBIVisuals/" + marketplaceProduct.LegacyId;
+                                            visual["isAppSource"] = true;
+                                        }
+                                        else if (coreVisuals.ContainsKey(visualGUID))
+                                        {
+                                            visual["name"] = visualId.Value<string>();
+                                            visual["publisher"] = "Microsoft";
+                                            visual["isCoreVisual"] = true;
+                                        }
+                                        else
+                                        {
+                                            workspaceHaveReportsWithPrivateCV = true;
+                                            if (orgStoreVisual == null)
+                                            {
+                                                visual["name"] = visualId.Value<string>();
+                                            }
+                                            visual["isPrivate"] = true;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        private string getLocale()
+        {
+            CultureInfo culture = CultureInfo.CurrentCulture;
+            return culture.Name;
         }
     }
 }

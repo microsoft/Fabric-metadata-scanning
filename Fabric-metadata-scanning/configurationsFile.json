@@ -43,5 +43,12 @@
     "baseOutputFolder": "outputs\\Workspaces",
     "requestsLimit": 500,
     "limitDurationInMinutes": 60
+  },
+  "catalogAccess": {
+    "uri": "https://catalogapi.azure.com/offers?api-version=2018-08-01-beta&storefront=appsource",
+    "enrichVisuals": true
+  },
+  "orgVisuals": {
+    "fileLocation": "C:\\Users\\glaventman\\Downloads\\OrganizationalVisuals.csv"
   }
 }
