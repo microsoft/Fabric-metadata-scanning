@@ -1,8 +1,6 @@
 ﻿using Fabric_metadata_scanning;
-using Microsoft.PowerBI.Api.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System.Text.Json.Nodes;
 using System.Globalization;
 
 namespace Fabric_Metadata_Scanning

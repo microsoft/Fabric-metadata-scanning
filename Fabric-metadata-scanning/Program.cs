@@ -1,5 +1,4 @@
-﻿using Fabric_metadata_scanning;
-using Fabric_Metadata_Scanning;
+﻿using Fabric_Metadata_Scanning;
 using Newtonsoft.Json.Linq;
 
 class Program
