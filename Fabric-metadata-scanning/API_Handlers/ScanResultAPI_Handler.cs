@@ -15,15 +15,14 @@ namespace Fabric_Metadata_Scanning
         private object lockObject = new object();
         private Dictionary<string, int> artifactsCounters { get; set; }
         private Dictionary<string, bool> workspacesWithReports { get; set; }
-        private Dictionary<string, bool> coreVisuals;
         private JObject datasources;
         private HashSet<dynamic> datasourceInstancesSet;
         private HashSet<dynamic> misconfiguredDatasourceInstancesSet;
-        private List<MarketplaceProduct> marketplaceProducts;
-        private List<OrgStoreVisual> orgStoreVisuals;
 
-        public string? catalogUri { get; private set; }
-        public bool enrichVisuals { get; private set; }
+        private Visuals_Handler visualsHandler = new();
+
+        public bool processVisuals { get; private set; }
+        public bool onlyWorkspaceWithVisuals { get; private set; }
 
         private ScanResultAPI_Handler() : base("scanResult")
         {
@@ -50,79 +49,14 @@ namespace Fabric_Metadata_Scanning
             datasourceInstancesSet = new HashSet<dynamic>();
             misconfiguredDatasourceInstancesSet = new HashSet<dynamic>();
 
-            catalogUri = Configuration_Handler.Instance.getConfig("catalogAccess", "uri").Value<string>();
-            enrichVisuals = Configuration_Handler.Instance.getConfig("catalogAccess", "enrichVisuals").Value<bool>();
-
-            if (catalogUri != null && enrichVisuals)
+            processVisuals = Configuration_Handler.Instance.getConfig("visuals", "enrichVisuals").Value<bool>();
+            onlyWorkspaceWithVisuals = Configuration_Handler.Instance.getConfig("visuals", "onlyWorkspaceWithVisuals").Value<bool>();
+            if (processVisuals)
             {
-                var marketplaceHandler = new PowerBIMarketplaceApp_handler();
-                marketplaceProducts = marketplaceHandler.GetMarketplaceAppsAsync(catalogUri).Result;
+                string catalogUri = Configuration_Handler.Instance.getConfig("visuals", "catalogUri").Value<string>();
+                string orgStoreFile = Configuration_Handler.Instance.getConfig("visuals", "orgVisualsFileLocation").Value<string>();
+                visualsHandler.Initialize(catalogUri, orgStoreFile);
             }
-
-            coreVisuals = new Dictionary<string, bool>
-            {
-                { "actionButton", true},
-                { "animatedNumber", true},
-                { "areaChart", true},
-                { "barChart", true},
-                { "basicShape", true},
-                { "shape", true},
-                { "card", true},
-                { "cardVisual", true},
-                { "multiRowCard", true},
-                { "clusteredBarChart", true},
-                { "clusteredColumnChart", true},
-                { "columnChart", true},
-                { "donutChart", true},
-                { "funnel", true},
-                { "gauge", true},
-                { "hundredPercentStackedBarChart", true},
-                { "hundredPercentStackedColumnChart", true},
-                { "image", true},
-                { "lineChart", true},
-                { "lineStackedColumnComboChart", true},
-                { "lineClusteredColumnComboChart", true},
-                { "map", true},
-                { "filledMap", true},
-                { "azureMap", true},
-                { "ribbonChart", true},
-                { "shapeMap", true},
-                { "treemap", true},
-                { "pieChart", true},
-                { "realTimeLineChart", true},
-                { "scatterChart", true},
-                { "stackedAreaChart", true},
-                { "table", true},
-                { "matrix", true},
-                { "tableEx", true},
-                { "pivotTable", true},
-                { "accessibleTable", true},
-                { "slicer", true},
-                { "advancedSlicerVisual", true},
-                { "pageNavigator", true},
-                { "bookmarkNavigator", true},
-                { "filterSlicer", true},
-                { "textbox", true},
-                { "aiNarratives", true},
-                { "waterfallChart", true},
-                { "scriptVisual", true},
-                { "pythonVisual", true},
-                { "kpi", true},
-                { "keyDriversVisual", true},
-                { "decompositionTreeVisual", true},
-                { "qnaVisual", true},
-                { "scorecard", true},
-                { "rdlVisual", true},
-                { "dataQueryVisual", true},
-                { "debugVisual", true},
-                { "heatMap", true},            
-            };
-
-            string orgStoreFile = Configuration_Handler.Instance.getConfig("orgVisuals", "fileLocation").Value<string>();
-
-            var orgStore_handler = new OrgStore_handler();
-            orgStoreVisuals = orgStore_handler.GetOrgStoreContent(orgStoreFile);
-
         }
 
         public static ScanResultAPI_Handler Instance
@@ -161,17 +95,8 @@ namespace Fabric_Metadata_Scanning
             foreach (var workspace in workspacesArray)
             {
                 string outputFolder = $"{baseOutputFolder}\\{workspace["id"]}";
-                string outputFolderForRepWithCV = $"{baseOutputFolder}\\RepWithCV\\{workspace["id"]}";
-
-
-                if (!Directory.Exists(outputFolder))
-                {
-                    Directory.CreateDirectory(outputFolder);
-                }
-
-                var workspaceHaveReportsWithAppSourceCV = false;
-                var workspaceHaveReportsWithOrgCV = false;
-                var workspaceHaveReportsWithPrivateCV = false;
+                JObject visualStatistic = new();
+                bool createWSOutput = false;
 
                 lock (lockObject)
                 {
@@ -192,37 +117,29 @@ namespace Fabric_Metadata_Scanning
                                 artifactsCounters[propertyName] = artifactsArray.Count;
                             }
 
-                            if (enrichVisuals && propertyName.Contains("reports"))
+                            if (processVisuals && propertyName.Contains("reports"))
                             {
-                                enrichReports(ref workspaceHaveReportsWithAppSourceCV, ref workspaceHaveReportsWithOrgCV, ref workspaceHaveReportsWithPrivateCV, artifactsArray);
+                                visualStatistic = visualsHandler.processVisuals(artifactsArray);
                             }
                         }
                     }
                     artifactsCounters["workspaces"] += 1;
+
+                    createWSOutput = !processVisuals || !onlyWorkspaceWithVisuals || visualsHandler.hasCustomVisuals(visualStatistic);
+
+                    if (createWSOutput && !Directory.Exists(outputFolder))
+                    {
+                        Directory.CreateDirectory(outputFolder);
+                    }
                 }
 
-                string outputFilePath = $"{outputFolder}\\{scanId}_{resultTime}.json";
-                string outputFilePathForWsWithCV = $"{outputFolderForRepWithCV}\\{scanId}_{resultTime}.json";
-                string workspaceJson = JsonConvert.SerializeObject(workspace, Formatting.Indented);
-                using (StreamWriter stream = new StreamWriter(outputFilePath))
-                {
-                    try
-                    {
-                        stream.Write(workspaceJson);
-                    }
-                    catch { }
-                    stream.Close();
-                }
 
-                // Only for debugging
-                if (workspaceHaveReportsWithAppSourceCV && workspaceHaveReportsWithOrgCV && workspaceHaveReportsWithPrivateCV)
+                if (createWSOutput)
                 {
-                    if (!Directory.Exists(outputFolderForRepWithCV))
-                    {
-                        Directory.CreateDirectory(outputFolderForRepWithCV);
-                    }
-
-                    using (StreamWriter stream = new StreamWriter(outputFilePathForWsWithCV))
+                    string outputFilePath = $"{outputFolder}\\{scanId}_{resultTime}.json";
+                    string visualStatisticFilePath = $"{outputFolder}\\visualStatistics_{resultTime}.json";
+                    string workspaceJson = JsonConvert.SerializeObject(workspace, Formatting.Indented);
+                    using (StreamWriter stream = new StreamWriter(outputFilePath))
                     {
                         try
                         {
@@ -231,8 +148,20 @@ namespace Fabric_Metadata_Scanning
                         catch { }
                         stream.Close();
                     }
+                    if (processVisuals)
+                    {
+                        string statisticJson = JsonConvert.SerializeObject(visualStatistic, Formatting.Indented);
+                        using (StreamWriter stream = new StreamWriter(visualStatisticFilePath))
+                        {
+                            try
+                            {
+                                stream.Write(statisticJson);
+                            }
+                            catch { }
+                            stream.Close();
+                        }
+                    }
                 }
-
             }
 
             //finished
@@ -272,100 +201,24 @@ namespace Fabric_Metadata_Scanning
                         serializer.Serialize(file, datasources);
                     }
 
+                    if (processVisuals)
+                    {
+                        using (StreamWriter file = File.CreateText($"{finalResultsDileDirPath}\\visuals.json"))
+                        {
+                            JsonSerializer serializer = new JsonSerializer
+                            {
+                                Formatting = Formatting.Indented
+                            };
+
+                            serializer.Serialize(file, visualsHandler.globalStatistic());
+                        }
+                    }
+
                     Console.WriteLine($"Scanning finished, The output is displayed in {Environment.CurrentDirectory + "\\" + finalResultsDileDirPath}");
                 }
             }
             return true;
         }
 
-        private void enrichReports(ref bool workspaceHaveReportsWithAppSourceCV, ref bool workspaceHaveReportsWithOrgCV, ref bool workspaceHaveReportsWithPrivateCV, JArray artifactsArray)
-        {
-            foreach (var report in artifactsArray)
-            {
-                var reportSections = report["sections"];
-                if (reportSections != null)
-                {
-                    if (reportSections is JArray sectionArray && sectionArray.Count > 0)
-                    {
-                        foreach (var section in sectionArray)
-                        {
-                            var sectionVisuals = section["visuals"];
-                            if (sectionVisuals != null && sectionVisuals is JArray visualArray && visualArray.Count > 0)
-                            {
-                                foreach (var visual in visualArray)
-                                {
-                                    var visualId = visual["visualGuid"];
-                                    visual["isOrgStore"] = false;
-                                    visual["isAppSource"] = false;
-                                    visual["isCoreVisual"] = false;
-                                    visual["isPrivate"] = false;
-                                    visual["isCertified"] = false;
-                                    if (visualId != null)
-                                    {
-                                        var visualGUID = visualId.Value<string>();
-                                        var orgStoreVisual = orgStoreVisuals.FirstOrDefault(v => v.guid == visualGUID);
-                                        if (orgStoreVisual != null)
-                                        {
-                                            workspaceHaveReportsWithOrgCV = true;
-                                            visual["isOrgStore"] = true;
-                                            if (orgStoreVisual.source == "AppSource")
-                                            {
-                                                visual["isAppSource"] = true;
-                                            }
-                                            else
-                                            {
-                                                visual["originalVisualGUID"] = visualGUID.Replace("_OrgStore", "");
-                                                visual["isPrivate"] = true;
-
-                                            }
-                                            visual["name"] = orgStoreVisual.name;
-                                        }
-
-                                        var marketplaceProduct = marketplaceProducts.FirstOrDefault(p => p.PowerBIVisualId == visualGUID);
-
-                                        if (marketplaceProduct != null)
-                                        {
-                                            workspaceHaveReportsWithAppSourceCV = true;
-                                            visual["publisher"] = marketplaceProduct.PublisherDisplayName;
-                                            if (orgStoreVisual == null)
-                                            {
-                                                visual["name"] = marketplaceProduct.DisplayName;
-                                                visual["isCertified"] = (null != marketplaceProduct.EnrichedData.Tags) && marketplaceProduct.EnrichedData.Tags.Contains(MarketplaceProduct.c_powerBICertfied);
-                                            }
-                                            else
-                                            {
-                                            }
-                                            visual["appSourceLink"] = "https://appsource.microsoft.com/" + getLocale() + "/product/PowerBIVisuals/" + marketplaceProduct.LegacyId;
-                                            visual["isAppSource"] = true;
-                                        }
-                                        else if (coreVisuals.ContainsKey(visualGUID))
-                                        {
-                                            visual["name"] = visualId.Value<string>();
-                                            visual["publisher"] = "Microsoft";
-                                            visual["isCoreVisual"] = true;
-                                        }
-                                        else
-                                        {
-                                            workspaceHaveReportsWithPrivateCV = true;
-                                            if (orgStoreVisual == null)
-                                            {
-                                                visual["name"] = visualId.Value<string>();
-                                            }
-                                            visual["isPrivate"] = true;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        private string getLocale()
-        {
-            CultureInfo culture = CultureInfo.CurrentCulture;
-            return culture.Name;
-        }
     }
 }

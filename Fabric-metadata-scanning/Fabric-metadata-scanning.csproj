@@ -29,10 +29,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="configurationsFileUpdated.json">
+    <None Update="configurationsFile.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="configurationsFile.json">
+    <None Update="configurationsFileOriginal.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

@@ -12,7 +12,7 @@ namespace Fabric_metadata_scanning
             {
                 csv.Read();
                 csv.ReadHeader();
-
+                csv.Context.RegisterClassMap<OrgStoreVisualMap>();
                 var records = csv.GetRecords<OrgStoreVisual>().ToList();
                 return records;
             }

@@ -35,7 +35,7 @@ namespace Fabric_metadata_scanning
                     // Attach a URL parameter "x-ms-clientname=PowerBI-<SOME_GUID>"
                     // This parameter value is logged in AppSource telemetry, and will allow for easier correlation of events.
                     urlBuilder.SetQueryParameter(c_requestIdentifierParamName, c_requestIdentifierFormat.FormatWithInvariantCulture(Guid.NewGuid()));
-                    Console.WriteLine($"Marketplace Cache: Fetching page {0} from URL '{1}'", pageIndex, urlBuilder.Uri);
+                    Console.WriteLine($"Marketplace Cache: Fetching page {pageIndex} from URL '{urlBuilder.Uri}'");
 
                     var response = await GetAsync<MarketplaceProductCollection>(urlBuilder.Uri);
                     hasNextLink = !response.NextPageLink.IsNullOrEmpty();
@@ -46,7 +46,7 @@ namespace Fabric_metadata_scanning
                     var visuals = response.Items.Where(app => app.OfferType == c_visualProductV2);
                     productList.AddRange(visuals);
 
-                    Console.WriteLine($"Marketplace Cache: Fetching page {0} completed successfully. Added {1} apps. hasNextLink={2}", pageIndex, apps.Count(), hasNextLink);
+                    Console.WriteLine($"Marketplace Cache: Fetching page {pageIndex} completed successfully. Added {visuals.Count()} apps. hasNextLink={hasNextLink}");
 
                     if (hasNextLink)
                     {
@@ -57,7 +57,7 @@ namespace Fabric_metadata_scanning
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Marketplace Cache: An error occured while fetching apps from URL '{0}' (Page {1}). Error details: {2}", urlBuilder.Uri, pageIndex, ex);
+                    Console.WriteLine($"Marketplace Cache: An error occured while fetching apps from URL '{urlBuilder.Uri}' (Page {pageIndex}). Error details: {ex.Message}");
                     // After an error from AppSource, stop fetching more applications - this can lead to a partial apps list, but otherwise it will be empty.
                     hasNextLink = false;
                 }
