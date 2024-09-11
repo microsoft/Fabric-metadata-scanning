@@ -18,12 +18,13 @@ This is a template. Feel free to adjust and modify it for your needs.
 
 4. Set the name and supported account types and click Register.
 5. On the left bar, go to Overview, and copy the Application (client) ID and Directory (tenant) ID to the configuration file (under "auth").
+
+![img](https://github.com/microsoft/Fabric-metadata-scanning/blob/main/Fabric-metadata-scanning/images/clientId.png)
+
 6. Go to Fabric(Power BI) portal, click on Settings -> Admin portal -> Admin API settings.
    Enable Admin Switch: Enhance admin APIs responses with detailed metadata, choose Specific
    security groups (recommended) and add your security group to the list.
 7. On the left bar, go to Authentication.Click on Add platform -> "Mobile and desktop applications Quickstart Docs Redirect URIs" and set http://localhost as Custom redirect URIs.
-
-![img](https://github.com/microsoft/Fabric-metadata-scanning/blob/main/Fabric-metadata-scanning/images/clientId.png)
 
 ### Using Service Principal(Recommended):
 8. On the app's left bar click on Certificates & secrets and create new client secret. You will get a secret value, copy that value to a safe place.
