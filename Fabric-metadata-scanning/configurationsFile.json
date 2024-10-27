@@ -1,12 +1,13 @@
 {
   "shared": {
-    "threadsCount": 4,
+    "threadsCount": 1,
     "defaultRetryAfter": 500
   },
   "auth": {
     "clientId": "<your client id>",
     "tenantId": "<your tenant id>",
     "authMethod": "Service_Principal", // Service_Principal or Delegated_Token
+
 
     //For Service Principal only.
     "keyVaultName": "<your key vault name>",
@@ -15,7 +16,7 @@
   },
   "modified": {
     "outputFolder": "outputs\\ModifiedWorkspaces",
-    "modifiedSince": "2024-03-02T07:19:11.0718286Z",
+    "modifiedSince": "2024-08-10T12:19:20.0718286Z",
     "alwaysFullScan": false,
     "excludeInactiveWorkspaces": false,
     "excludePersonalWorkspaces": false,
@@ -30,7 +31,7 @@
     "getArtifactUsers": true,
     "lineage": true,
     "getTridentArtifacts": true,
-    "reportObjects": true,
+	"reportObjects": true,
     "requestsLimit": 500,
     "limitDurationInMinutes": 60
   },
@@ -43,5 +44,11 @@
     "baseOutputFolder": "outputs\\Workspaces",
     "requestsLimit": 500,
     "limitDurationInMinutes": 60
+  },
+  "visuals": {
+    "catalogUri": "https://catalogapi.azure.com/offers?api-version=2018-08-01-beta&storefront=appsource",
+    "enrichVisuals": true,
+    "orgVisualsFileLocation": "C:\\Users\\glaventman\\Downloads\\OrganizationalVisuals.csv",
+    "onlyWorkspaceWithVisuals": true
   }
 }

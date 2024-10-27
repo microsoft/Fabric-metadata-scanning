@@ -25,10 +25,10 @@ namespace Fabric_Metadata_Scanning
             {
                 HttpResponseMessage response;
                 setHeaders(httpClient);
-                string scanIdValue = scanId != null ? scanId : "";
+                string requestUri = scanId == null ? apiUriBuilder.Uri.ToString() : apiUriBuilder.Uri + $"/{scanId}" ;
                 do
                 {
-                    response = await httpClient.GetAsync(apiUriBuilder.Uri + $"/{scanIdValue}");
+                    response = await httpClient.GetAsync(requestUri);
 
                 } while (!await verifySuccess(response));
 
@@ -39,10 +39,20 @@ namespace Fabric_Metadata_Scanning
         public void setRequestParameters()
         {
             StringBuilder parametersString = new StringBuilder();
+            bool isFirst = true;
             foreach (JProperty apiProperty in parameters.Properties())
             {
                 JToken token = apiProperty.Value;
-                parametersString.Append($"{apiProperty.Name}={token.Value<object>()}&");
+                if (isFirst)
+                {                     
+                    parametersString.Append("?");
+                    isFirst = false;
+                }
+                else
+                {
+                    parametersString.Append("&");
+                }
+                parametersString.Append($"{apiProperty.Name}={token.Value<object>()}");
             }
 
             apiUriBuilder.Query = parametersString.ToString();

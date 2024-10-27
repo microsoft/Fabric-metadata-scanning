@@ -1,6 +1,7 @@
-﻿using Newtonsoft.Json;
+﻿using Fabric_metadata_scanning;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System.Text.Json.Nodes;
+using System.Globalization;
 
 namespace Fabric_Metadata_Scanning
 {
@@ -13,9 +14,15 @@ namespace Fabric_Metadata_Scanning
 
         private object lockObject = new object();
         private Dictionary<string, int> artifactsCounters { get; set; }
+        private Dictionary<string, bool> workspacesWithReports { get; set; }
         private JObject datasources;
         private HashSet<dynamic> datasourceInstancesSet;
         private HashSet<dynamic> misconfiguredDatasourceInstancesSet;
+
+        private Visuals_Handler visualsHandler = new();
+
+        public bool processVisuals { get; private set; }
+        public bool onlyWorkspaceWithVisuals { get; private set; }
 
         private ScanResultAPI_Handler() : base("scanResult")
         {
@@ -41,6 +48,15 @@ namespace Fabric_Metadata_Scanning
             datasources = new JObject();
             datasourceInstancesSet = new HashSet<dynamic>();
             misconfiguredDatasourceInstancesSet = new HashSet<dynamic>();
+
+            processVisuals = Configuration_Handler.Instance.getConfig("visuals", "enrichVisuals").Value<bool>();
+            onlyWorkspaceWithVisuals = Configuration_Handler.Instance.getConfig("visuals", "onlyWorkspaceWithVisuals").Value<bool>();
+            if (processVisuals)
+            {
+                string catalogUri = Configuration_Handler.Instance.getConfig("visuals", "catalogUri").Value<string>();
+                string orgStoreFile = Configuration_Handler.Instance.getConfig("visuals", "orgVisualsFileLocation").Value<string>();
+                visualsHandler.Initialize(catalogUri, orgStoreFile);
+            }
         }
 
         public static ScanResultAPI_Handler Instance
@@ -79,25 +95,10 @@ namespace Fabric_Metadata_Scanning
             foreach (var workspace in workspacesArray)
             {
                 string outputFolder = $"{baseOutputFolder}\\{workspace["id"]}";
+                JObject visualStatistic = new();
+                bool createWSOutput = false;
 
-                if (!Directory.Exists(outputFolder))
-                {
-                    Directory.CreateDirectory(outputFolder);
-                }
-
-                string outputFilePath = $"{outputFolder}\\{scanId}_{resultTime}.json";
-                string workspaceJson = JsonConvert.SerializeObject(workspace, Formatting.Indented);
-                using (StreamWriter stream = new StreamWriter(outputFilePath))
-                {
-                    try
-                    {
-                        stream.Write(workspaceJson);
-                    }
-                    catch { }
-                    stream.Close();
-                }
-                
-                lock(lockObject)
+                lock (lockObject)
                 {
 
                     foreach (var property in ((JObject)workspace).Properties())
@@ -115,10 +116,51 @@ namespace Fabric_Metadata_Scanning
                             {
                                 artifactsCounters[propertyName] = artifactsArray.Count;
                             }
+
+                            if (processVisuals && propertyName.Contains("reports"))
+                            {
+                                visualStatistic = visualsHandler.processVisuals(artifactsArray);
+                            }
                         }
                     }
-
                     artifactsCounters["workspaces"] += 1;
+
+                    createWSOutput = !processVisuals || !onlyWorkspaceWithVisuals || visualsHandler.hasCustomVisuals(visualStatistic);
+
+                    if (createWSOutput && !Directory.Exists(outputFolder))
+                    {
+                        Directory.CreateDirectory(outputFolder);
+                    }
+                }
+
+
+                if (createWSOutput)
+                {
+                    string outputFilePath = $"{outputFolder}\\{scanId}_{resultTime}.json";
+                    string visualStatisticFilePath = $"{outputFolder}\\visualStatistics_{resultTime}.json";
+                    string workspaceJson = JsonConvert.SerializeObject(workspace, Formatting.Indented);
+                    using (StreamWriter stream = new StreamWriter(outputFilePath))
+                    {
+                        try
+                        {
+                            stream.Write(workspaceJson);
+                        }
+                        catch { }
+                        stream.Close();
+                    }
+                    if (processVisuals)
+                    {
+                        string statisticJson = JsonConvert.SerializeObject(visualStatistic, Formatting.Indented);
+                        using (StreamWriter stream = new StreamWriter(visualStatisticFilePath))
+                        {
+                            try
+                            {
+                                stream.Write(statisticJson);
+                            }
+                            catch { }
+                            stream.Close();
+                        }
+                    }
                 }
             }
 
@@ -159,10 +201,24 @@ namespace Fabric_Metadata_Scanning
                         serializer.Serialize(file, datasources);
                     }
 
+                    if (processVisuals)
+                    {
+                        using (StreamWriter file = File.CreateText($"{finalResultsDileDirPath}\\visuals.json"))
+                        {
+                            JsonSerializer serializer = new JsonSerializer
+                            {
+                                Formatting = Formatting.Indented
+                            };
+
+                            serializer.Serialize(file, visualsHandler.globalStatistic());
+                        }
+                    }
+
                     Console.WriteLine($"Scanning finished, The output is displayed in {Environment.CurrentDirectory + "\\" + finalResultsDileDirPath}");
                 }
             }
             return true;
         }
+
     }
 }
